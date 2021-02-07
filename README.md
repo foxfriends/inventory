@@ -20,8 +20,8 @@ This app must be hosted on some public webserver. The URL of that server is refe
 
 Create the following files:
 
-*   `src/google/credentials.json`: Get this file from Google Developer Console by following the quickstart [instructions](https://developers.google.com/sheets/api/quickstart/nodejs). Configure the redirect URI to be `<base_url>/google/oauth`.
-*   `src/etsy/credentials.json`: Create an app in the [Etsy Developers](https://www.etsy.com/developers/) portal and create this file with the following information:
+*   `src/google/credentials.json`: Get this file from [Google Developer Console quickstart][Google Developer]. Configure the redirect URI to be `<base_url>/google/oauth`.
+*   `src/etsy/credentials.json`: Create an app in the [Etsy Developers][] portal and create this file with the following information:
 
     ```json
     {
@@ -31,7 +31,7 @@ Create the following files:
         "redirect_uri": "<base_url>/etsy/oauth"
     }
     ```
-*   `src/shopify/credentials.json`: Become a Shopify Partner and create a custom app. Configure the App URL to be `<base_url>/shopify/setup` and the redirection URL to be `<base_url>/shopify/oauth`, then create this file with the following information:
+*   `src/shopify/credentials.json`: Become a [Shopify Partner][] and create a custom app. Configure the App URL to be `<base_url>/shopify/setup` and the redirection URL to be `<base_url>/shopify/oauth`, then create this file with the following information:
 
     ```json
     {
@@ -41,6 +41,10 @@ Create the following files:
         "redirect_uri": "<base_url>/shopify/oauth"
     }
     ```
+
+[Google Developer]: https://developers.google.com/sheets/api/quickstart/nodejs
+[Etsy Developer]: https://www.etsy.com/developers/
+[Shopify Partner]: https://partners.shopify.com/
 
 ## Usage
 
