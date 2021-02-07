@@ -12,7 +12,7 @@ const CREDENTIALS_PATH = join(__dirname, 'credentials.json');
 const TOKEN_PATH = join(__dirname, 'token.json');
 const SCOPES = ['read_products', 'write_inventory'];
 
-const constructClient = converge(construct(ShopifyOAuth2), [prop('shop'), prop('api_key'), prop('secret_key')]);
+const constructClient = converge(construct(ShopifyOAuth2), [prop('shop'), prop('api_key'), prop('secret_key'), prop('redirect_uri')]);
 
 class Shopify {
   constructor(client, token) {

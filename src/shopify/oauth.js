@@ -3,11 +3,11 @@ const bent = require('bent');
 const log = require('../util/log');
 
 class ShopifyOAuth2 {
-  constructor(shop, clientId, clientSecret) {
+  constructor(shop, clientId, clientSecret, redirectUri) {
     this.shop = shop;
     this.clientId = clientId;
     this.clientSecret = clientSecret;
-    this.redirectUri = 'https://inventory.cameldridge.com/shopify/oauth';
+    this.redirectUri = redirectUri;
   }
 
   generateAuthUrl(secret, scopes) {

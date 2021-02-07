@@ -16,10 +16,10 @@ const constructClient = converge(
     __,
     __,
     '1.0A',
-    'https://inventory.cameldridge.com/etsy/oauth',
+    __,
     'HMAC-SHA1',
   ),
-  [prop('keystring'), prop('shared_secret')],
+  [prop('keystring'), prop('shared_secret'), prop('redirect_uri')],
 );
 
 class Etsy {
