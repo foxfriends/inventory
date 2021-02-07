@@ -1,0 +1,36 @@
+{
+  "name": "inventory",
+  "version": "1.0.0",
+  "description": "Automatically sync inventory for various ecommerce platforms",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/foxfriends/inventory.git"
+  },
+  "keywords": [
+    "inventory",
+    "shopify",
+    "etsy"
+  ],
+  "author": "Cameron Eldridge",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/foxfriends/inventory/issues"
+  },
+  "homepage": "https://github.com/foxfriends/inventory#readme",
+  "dependencies": {
+    "@koa/router": "^10.0.0",
+    "bent": "^7.3.12",
+    "form-urlencoded": "^4.2.1",
+    "googleapis": "^67.0.0",
+    "koa": "^2.13.1",
+    "koa-error": "^3.2.0",
+    "koa-logger": "^3.2.1",
+    "oauth": "^0.9.15",
+    "ramda": "^0.27.1"
+  }
+}
