@@ -54,3 +54,21 @@ Once the server is running, the single supported user can provide access to the 
 *   In the Shopify Partners Dashboard, generate the Merchant Install Link and open it. This will trigger the Shopify authorization.
 
 In all 3 cases, once complete you should be presented with the text `<app> setup complete`, indicating that the setup was successful.
+
+Next, configure the settings for each app:
+*   Visit `<base_url>/google/settings` and provide the URL of the spreadsheet containing your inventory data. This spreadsheet must be owned by the Google account that you authenticated with in the previous step.
+
+## Data format
+
+Ensure your products have the same SKUs across all your shops, it is by SKU that the inventory will be synchronized.
+The spreadsheet above must contain columns with headers `SKU` and `Quantity`. The columns may be in any order, and
+other columns may exist, but the headers must be on the first row. For example, the following sheet would be acceptable:
+
+| Name   | SKU     | Quantity | Notes                               |
+| :-     | :-      |       -: | :-                                  |
+| Apple  | SKU-123 | 10       |                                     |
+| Orange | SKU-234 | 15       |                                     |
+| Banana | SKU-345 | 20       | Not going to make any more of these |
+
+Ensure that all quantities are numbers. Any quantity that is not a number will be ignored. Any SKU that cannot be
+found will also be silently ignored.
