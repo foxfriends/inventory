@@ -6,6 +6,7 @@ const { and } = require('../util/promise');
 const log = require('../util/log');
 
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
+const SETTINGS_PATH = join(__dirname, 'settings.json');
 const TOKEN_PATH = join(__dirname, 'token.json');
 const CREDENTIALS_PATH = join(__dirname, 'credentials.json');
 const AUTH_OPTIONS = { access_type: 'offline', scope: SCOPES, prompt: 'consent' };
@@ -34,6 +35,18 @@ class Google {
     fs.writeFile(TOKEN_PATH, JSON.stringify(token))
       .catch(log.error('Failed to save token'));
     this.setCredentials(token);
+  }
+
+  async settings(newSettings) {
+    this._settings = this._settings || await fs
+      .readFile(SETTINGS_PATH)
+      .then(JSON.parse)
+      .catch(always({}));
+    if (newSettings) {
+      Object.assign(this._settings, newSettings);
+      await fs.writeFile(SETTINGS_PATH, JSON.stringify(this._settings));
+    }
+    return this._settings;
   }
 }
 

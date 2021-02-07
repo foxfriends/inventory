@@ -2,6 +2,7 @@ const Koa = require('koa');
 const error = require('koa-error');
 const Router = require('@koa/router');
 const logger = require('koa-logger');
+const bodyparser = require('koa-bodyparser');
 
 const google = require('./google');
 const etsy = require('./etsy');
@@ -17,6 +18,7 @@ const router = new Router()
 app
   .use(error())
   .use(logger())
+  .use(bodyparser())
   .use(google())
   .use(etsy())
   .use(shopify())
