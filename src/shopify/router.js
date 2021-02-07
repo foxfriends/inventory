@@ -1,5 +1,7 @@
 const Router = require('@koa/router');
 
+const ONE_HOUR = 60 * 60 * 1000;
+
 module.exports = new Router()
   .get('/setup', async (ctx) => {
     // TODO: should verify hmac here...

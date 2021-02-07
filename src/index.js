@@ -9,8 +9,6 @@ const shopify = require('./shopify');
 
 const app = new Koa();
 
-const ONE_HOUR = 60 * 60 * 1000;
-
 const router = new Router()
   .use('/google', google.routes(), google.allowedMethods())
   .use('/etsy', etsy.routes(), etsy.allowedMethods())
