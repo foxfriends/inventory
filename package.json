@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/foxfriends/inventory#readme",
   "dependencies": {
+    "@flighter/a1-notation": "^1.0.7",
     "@koa/router": "^10.0.0",
     "bent": "^7.3.12",
     "dot": "^2.0.0-beta.1",

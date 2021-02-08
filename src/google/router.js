@@ -2,7 +2,7 @@ const Router = require('@koa/router');
 const { prop } = require('ramda');
 const { html } = require('../util/template');
 
-const setting = (name) => (ctx) => ctx.google.settings().then(prop(name));
+const setting = (name) => (ctx) => ctx.google.setting(name);
 
 module.exports = new Router()
   .get('/setup', async (ctx) => {
@@ -35,8 +35,7 @@ module.exports = new Router()
     ctx.redirect('/google/settings');
   })
   .get('/view', async (ctx) => {
-    const spreadsheet = ctx.google.load();
-    if (!spreadsheet) {
-      console.log(spreadsheet);
-    }
+    const spreadsheet = await ctx.google.inventory();
+    ctx.status = 200;
+    ctx.body = spreadsheet;
   });
