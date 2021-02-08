@@ -17,27 +17,32 @@ const sheets = google.sheets('v4');
 const constructClient = converge(construct(google.auth.OAuth2), [prop('client_id'), prop('client_secret'), path(['redirect_uris', 0])]);
 
 class Google {
+  #client;
+
   constructor(client, token) {
-    this.client = client;
-    this.setCredentials(token);
+    this.#client = client;
+    this.#setCredentials(token);
   }
 
-  setCredentials(token) {
+  #setCredentials(token) {
     if (token) {
-      this.client.setCredentials(token);
+      this.#client.setCredentials(token);
     }
-    this.ready = !!token;
+    this.#ready = !!token;
   }
+
+  #ready = false;
+  get ready() { return this.#ready; }
 
   async generateAuthUrl() {
-    return this.client.generateAuthUrl(AUTH_OPTIONS)
+    return this.#client.generateAuthUrl(AUTH_OPTIONS)
   }
 
   async auth(code) {
-    const { tokens: token } = await this.client.getToken(code);
+    const { tokens: token } = await this.#client.getToken(code);
     fs.writeFile(TOKEN_PATH, JSON.stringify(token))
       .catch(log.error('Failed to save token'));
-    this.setCredentials(token);
+    this.#setCredentials(token);
   }
 
   async setting(name) {
@@ -46,16 +51,17 @@ class Google {
       .then(prop(name));
   }
 
+  #settings;
   async settings(newSettings) {
-    this._settings = this._settings || await fs
+    this.#settings = this.#settings || await fs
       .readFile(SETTINGS_PATH)
       .then(JSON.parse)
       .catch(always({}));
     if (newSettings) {
-      Object.assign(this._settings, newSettings);
-      await fs.writeFile(SETTINGS_PATH, JSON.stringify(this._settings));
+      Object.assign(this.#settings, newSettings);
+      await fs.writeFile(SETTINGS_PATH, JSON.stringify(this.#settings));
     }
-    return this._settings;
+    return this.#settings;
   }
 
   async inventory(newInventory) {
@@ -64,13 +70,13 @@ class Google {
       throw new Error('Not yet implemented');
     }
     const spreadsheet = await sheets.spreadsheets
-      .get({ spreadsheetId, auth: this.client })
+      .get({ spreadsheetId, auth: this.#client })
       .then(prop('data'));
     const { rowCount, columnCount } = spreadsheet.sheets[0].properties.gridProperties;
     const GET_PARAMS = {
       spreadsheetId,
       valueRenderOption: 'UNFORMATTED_VALUE',
-      auth: this.client,
+      auth: this.#client,
     };
     const [skuColumn, quantityColumn] = await sheets.spreadsheets.values
       .get({

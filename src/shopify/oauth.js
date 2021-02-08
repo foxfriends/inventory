@@ -4,31 +4,37 @@ const log = require('../util/log');
 const graphql = require('./queries/tag');
 
 class ShopifyOAuth2 {
+  #shop;
+  #clientId;
+  #clientSecret;
+  #redirectUri;
+  #post;
+
   constructor(shop, clientId, clientSecret, redirectUri) {
-    this.shop = shop;
-    this.clientId = clientId;
-    this.clientSecret = clientSecret;
-    this.redirectUri = redirectUri;
+    this.#shop = shop;
+    this.#clientId = clientId;
+    this.#clientSecret = clientSecret;
+    this.#redirectUri = redirectUri;
   }
 
   generateAuthUrl(secret, scopes) {
-    return `https://${this.shop}.myshopify.com/admin/oauth/authorize?client_id=${this.clientId}&scope=${scopes.join(',')}&state=${secret}&grant_options[]=&redirect_uri=${this.redirectUri}`;
+    return `https://${this.#shop}.myshopify.com/admin/oauth/authorize?client_id=${this.#clientId}&scope=${scopes.join(',')}&state=${secret}&grant_options[]=&redirect_uri=${this.#redirectUri}`;
   }
 
   async getToken(code) {
-    return post('/admin/oauth/access_token', log.debug(formurlencoded({
-      client_id: this.clientId,
-      client_secret: this.clientSecret,
+    return bent('POST', 'json', `https://${this.#shop}.myshopify.com`)('/admin/oauth/access_token', log.debug(formurlencoded({
+      client_id: this.#clientId,
+      client_secret: this.#clientSecret,
       code,
     })), { 'Content-Type': 'application/x-www-form-urlencoded' });
   }
 
   setCredentials({ access_token }) {
-    this.post = bent('POST', `https://${this.shop}.myshopify.com`, { 'X-Shopify-Access-Token': access_token });
+    this.#post = bent('POST', 'json', `https://${this.#shop}.myshopify.com`, { 'X-Shopify-Access-Token': access_token });
   }
 
   async graphql(query, variables) {
-    return this.post('/admin/api/2021-01/graphql.json', { query, variables });
+    return this.#post('/admin/api/2021-01/graphql.json', { query, variables });
   }
 
   /**

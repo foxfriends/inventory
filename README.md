@@ -25,6 +25,7 @@ Create the following files:
 
     ```json
     {
+        "shop": "<shop_id_or_name>",
         "app_name": "<app_name>",
         "keystring": "<keystring>",
         "shared_secret": "<shared_secret>",

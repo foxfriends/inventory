@@ -17,29 +17,34 @@ const SCOPES = ['read_products', 'write_inventory'];
 const constructClient = converge(construct(ShopifyOAuth2), [prop('shop'), prop('api_key'), prop('secret_key'), prop('redirect_uri')]);
 
 class Shopify {
+  #client;
+
   constructor(client, token) {
-    this.client = client;
-    this.setCredentials(token);
+    this.#client = client;
+    this.#setCredentials(token);
   }
 
-  setCredentials(credentials) {
+  #setCredentials(credentials) {
     if (credentials) {
-      this.client.setCredentials(credentials);
+      this.#client.setCredentials(credentials);
     }
-    this.ready = !!credentials;
+    this.#ready = !!credentials;
   }
+
+  #ready = false;
+  get ready() { return this.#ready; }
 
   async generateAuthUrl() {
     const secret = crypto.randomBytes(20).toString('hex');
-    const url = this.client.generateAuthUrl(secret, SCOPES);
+    const url = this.#client.generateAuthUrl(secret, SCOPES);
     return { secret, url }
   }
 
   async auth(code) {
-    const token = await this.client.getToken(code);
+    const token = await this.#client.getToken(code);
     fs.writeFile(TOKEN_PATH, JSON.stringify(token))
       .catch(log.error('Failed to save token'));
-    this.setCredentials(token);
+    this.#setCredentials(token);
   }
 
   async inventory(newInventory) {
@@ -47,15 +52,13 @@ class Shopify {
       throw new Error('Not yet implemented');
     }
     // TODO: we only support one location for now.
-    const inventoryLevels = await this.client
+    const inventoryLevels = await this.#client
       .graphql(GET_INVENTORY)
-      .then((res) => res.json())
       .then(path(['data', 'locations', 'edges', 0, 'node', 'inventoryLevels']));
 
     while (inventoryLevels.pageInfo.hasNextPage) {
-      const page = await this.client
+      const page = await this.#client
         .graphql(GET_INVENTORY, { after: last(inventoryLevels.edges).cursor })
-        .then((res) => res.json())
         .then(path(['data', 'locations', 'edges', 0, 'node', 'inventoryLevels']));
       inventoryLevels.pageInfo = page.pageInfo;
       inventoryLevels.edges.push(...page.edges);

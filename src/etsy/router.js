@@ -18,5 +18,4 @@ module.exports = new Router()
     await ctx.etsy.auth(code, token, secret);
     ctx.status = 200;
     ctx.body = 'Etsy setup complete';
-  })
-
+  });
