@@ -19,4 +19,9 @@ module.exports = new Router()
     await ctx.shopify.auth(code);
     ctx.status = 200;
     ctx.body = 'Shopify setup complete';
+  })
+  .get('/view', async (ctx) => {
+    const result = await ctx.shopify.inventory();
+    ctx.status = 200;
+    ctx.body = result;
   });

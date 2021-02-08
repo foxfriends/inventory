@@ -5,6 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
     "test": "mocha"
   },
   "repository": {
@@ -36,5 +37,8 @@
     "oauth": "^0.9.15",
     "ramda": "^0.27.1",
     "tidy-template": "^1.0.7"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
   }
 }
