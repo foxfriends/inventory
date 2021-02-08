@@ -34,6 +34,7 @@
     "koa-bodyparser": "^4.3.0",
     "koa-error": "^3.2.0",
     "koa-logger": "^3.2.1",
+    "luxon": "^1.25.0",
     "oauth": "^0.9.15",
     "ramda": "^0.27.1",
     "tidy-template": "^1.0.7"

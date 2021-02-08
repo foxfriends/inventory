@@ -47,10 +47,7 @@ class Shopify {
     this.#setCredentials(token);
   }
 
-  async inventory(newInventory) {
-    if (newInventory) {
-      throw new Error('Not yet implemented');
-    }
+  async getInventory() {
     // TODO: we only support one location for now.
     const inventoryLevels = await this.#client
       .graphql(GET_INVENTORY)

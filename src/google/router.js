@@ -35,7 +35,6 @@ module.exports = new Router()
     ctx.redirect('/google/settings');
   })
   .get('/view', async (ctx) => {
-    const spreadsheet = await ctx.google.inventory();
+    ctx.body = await ctx.google.getInventory();
     ctx.status = 200;
-    ctx.body = spreadsheet;
   });

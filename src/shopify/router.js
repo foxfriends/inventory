@@ -21,7 +21,18 @@ module.exports = new Router()
     ctx.body = 'Shopify setup complete';
   })
   .get('/view', async (ctx) => {
-    const result = await ctx.shopify.inventory();
+    ctx.body = await ctx.shopify.getInventory();
     ctx.status = 200;
-    ctx.body = result;
+  })
+  .get('/pull', async (ctx) => {
+    const inventory = await ctx.shopify.getInventory();
+    await ctx.google.pushInventory('Shopify', inventory);
+    ctx.status = 200;
+    ctx.body = 'Ok';
+  })
+  .get('/sync', async (ctx) => {
+    const inventory = await ctx.shopify.getInventory();
+    await ctx.google.setInventory(inventory);
+    ctx.status = 200;
+    ctx.body = 'Ok';
   });
