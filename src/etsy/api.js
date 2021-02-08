@@ -41,20 +41,6 @@ class Etsy {
       .catch(log.error('Failed to save token'));
     this.#setCredentials(authtoken);
   }
-
-  async #getAll(endpoint, args = {}) {
-    const STEP = 100;
-    let results = [];
-    let count = null;
-    let offset = 0;
-    while (offset !== null) {
-      const response = await this.#client.get(endpoint, { ...args, offset, limit: STEP });
-      count = response.count;
-      results.push(...response.results);
-      offset = response.pagination.next_offset;
-    }
-    return results;
-  }
 }
 
 const token = fs

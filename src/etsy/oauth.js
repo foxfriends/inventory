@@ -1,4 +1,5 @@
 const { OAuth } = require('oauth');
+const Queue = require('../util/ratelimit');
 
 const uri = (strings, ...args) => {
   return strings.reduce((out, s, i) => out + s + (args[i] !== undefined ? encodeURIComponent(args[i]) : ''), '');
@@ -21,6 +22,7 @@ class EtsyOAuth {
   #redirectUri;
   #token;
   #secret;
+  #queue = new Queue(100); // Etsy has a rate limit of 10 requests per second
 
   constructor(clientId, clientSecret, redirectUri) {
     this.#oauth = new OAuth(
@@ -60,12 +62,26 @@ class EtsyOAuth {
   }
 
   async get(endpoint, args = {}) {
-    return new Promise((resolve, reject) => {
+    return this.#queue.schedule(() => new Promise((resolve, reject) => {
       this.#oauth.get(url(endpoint, args), this.#token, this.#secret, (error, result) => {
         if (error) { return reject(error); }
         resolve(JSON.parse(result));
       });
-    })
+    }));
+  }
+
+  async getAll(endpoint, args = {}) {
+    const STEP = 100;
+    let results = [];
+    let count = null;
+    let offset = 0;
+    while (offset !== null) {
+      const response = await this.#oauth.get(endpoint, { ...args, offset, limit: STEP });
+      count = response.count;
+      results.push(...response.results);
+      offset = response.pagination.next_offset;
+    }
+    return results;
   }
 }
 
