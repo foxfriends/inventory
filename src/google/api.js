@@ -186,5 +186,5 @@ module.exports = fs
   .then(JSON.parse)
   .then(prop('web'))
   .then(constructClient)
-  .then(and(token))
+  .then(and(always(token)))
   .then(apply(construct(Google)));

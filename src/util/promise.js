@@ -1,12 +1,17 @@
-const and = (...promises) => async (value) => [value, ...await Promise.all(promises)];
+const { applyTo } = require('ramda');
+
+const and = (...promises) => async (value) => [value, ...await Promise.all(promises.map(applyTo(value)))];
+
 const all = Promise.all.bind(Promise);
+
 const defer = (task) => {
   let resolve;
   let reject;
-  const promise = new Promise((res, rej) => (resolve = res, reject = rej)).then(task);
+  const promise = new Promise((res, rej) => (resolve = res, reject = rej))
+    .then(task);
   promise.start = resolve;
   promise.cancel = reject;
   return promise;
 };
 
-module.exports = { and, all };
+module.exports = { and, all, defer };

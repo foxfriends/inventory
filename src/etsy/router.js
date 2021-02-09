@@ -18,4 +18,18 @@ module.exports = new Router()
     await ctx.etsy.auth(code, token, secret);
     ctx.status = 200;
     ctx.body = 'Etsy setup complete';
-  });
+  })
+  .get('/check', async (ctx) => {
+    ctx.body = await ctx.etsy.checkAuth();
+    ctx.status = 200;
+  })
+  .get('/view', async (ctx) => {
+    ctx.body  = await ctx.etsy.getInventory();
+    ctx.status = 200;
+  })
+  .get('/pull', async (ctx) => {
+    const inventory = await ctx.etsy.getInventory();
+    await ctx.google.pushInventory('Etsy', inventory);
+    ctx.status = 200;
+    ctx.body = 'Ok';
+  })

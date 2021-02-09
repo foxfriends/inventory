@@ -80,5 +80,5 @@ module.exports = fs
   .readFile(CREDENTIALS_PATH)
   .then(JSON.parse)
   .then(constructClient)
-  .then(and(token))
+  .then(and(always(token)))
   .then(apply(construct(Shopify)));

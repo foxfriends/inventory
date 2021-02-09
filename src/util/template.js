@@ -60,4 +60,13 @@ const html = (strings, ...interpolations) => {
   };
 };
 
-module.exports = { html };
+const text = (strings, ...interpolations) => {
+  return (input) => {
+    const values = interpolations.map(applyTo(input));
+    return zip(strings, append('', values))
+      .flat()
+      .join('');
+  };
+};
+
+module.exports = { html, text };

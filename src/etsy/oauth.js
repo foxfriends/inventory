@@ -1,19 +1,9 @@
 const { OAuth } = require('oauth');
 const Queue = require('../util/ratelimit');
+const qs = require('qs');
 
-const uri = (strings, ...args) => {
-  return strings.reduce((out, s, i) => out + s + (args[i] !== undefined ? encodeURIComponent(args[i]) : ''), '');
-};
-
-const query = (args) => {
-  const entries = Object.entries(args);
-  if (entries.length === 0) { return ''; }
-  return '?' + entries
-    .map(([key, value]) => uri`${key}=${value}`)
-    .join('&');
-};
-
-const url = (endpoint, args = {}) => `${API_URL}${endpoint}${query(args)}`;
+const API_URL = 'https://openapi.etsy.com/v2';
+const url = (endpoint, args = {}) => `${API_URL}${endpoint}${qs.stringify(args, { addQueryPrefix: true })}`;
 
 class EtsyOAuth {
   #oauth;
@@ -22,11 +12,11 @@ class EtsyOAuth {
   #redirectUri;
   #token;
   #secret;
-  #queue = new Queue(100); // Etsy has a rate limit of 10 requests per second
+  #queue = new Queue(120); // Etsy has a rate limit of 10 requests per second, we give them a bit of a head start
 
   constructor(clientId, clientSecret, redirectUri) {
     this.#oauth = new OAuth(
-      'https://openapi.etsy.com/v2/oauth/request_token?scope=listings_w',
+      'https://openapi.etsy.com/v2/oauth/request_token?scope=listings_r%20listings_w',
       'https://openapi.etsy.com/v2/oauth/access_token',
       clientId,
       clientSecret,
@@ -76,7 +66,7 @@ class EtsyOAuth {
     let count = null;
     let offset = 0;
     while (offset !== null) {
-      const response = await this.#oauth.get(endpoint, { ...args, offset, limit: STEP });
+      const response = await this.get(endpoint, { ...args, offset, limit: STEP });
       count = response.count;
       results.push(...response.results);
       offset = response.pagination.next_offset;
