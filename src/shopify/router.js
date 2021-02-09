@@ -17,20 +17,19 @@ module.exports = new Router()
     const { code, state } = ctx.query;
     if (secret !== state) { ctx.throw(401); }
     await ctx.shopify.auth(code);
-    ctx.status = 200;
-    ctx.body = 'Shopify setup complete';
+    ctx.redirect('/');
   })
   .get('/view', async (ctx) => {
     ctx.body = await ctx.shopify.getInventory();
     ctx.status = 200;
   })
-  .get('/pull', async (ctx) => {
+  .post('/pull', async (ctx) => {
     const inventory = await ctx.shopify.getInventory();
     await ctx.google.pushInventory('Shopify', inventory);
     ctx.status = 200;
     ctx.body = 'Ok';
   })
-  .get('/sync', async (ctx) => {
+  .post('/sync', async (ctx) => {
     const inventory = await ctx.shopify.getInventory();
     await ctx.google.setInventory(inventory);
     ctx.status = 200;

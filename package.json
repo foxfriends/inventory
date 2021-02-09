@@ -42,5 +42,13 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.7"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "src/google/token.json",
+      "src/google/settings.json",
+      "src/etsy/token.json",
+      "src/shopify/token.json"
+    ]
   }
 }
