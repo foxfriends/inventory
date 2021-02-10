@@ -1,6 +1,34 @@
 const { join: joinPath } = require('path');
 const { promises: fs } = require('fs');
-const { __, always, apply, applySpec, chain, compose, concat, construct, converge, evolve, join, map, o, path, pipe, prop } = require('ramda');
+const {
+  __,
+  always,
+  andThen,
+  apply,
+  applySpec,
+  assocPath,
+  chain,
+  compose,
+  complement,
+  concat,
+  construct,
+  converge,
+  equals,
+  evolve,
+  find,
+  identity,
+  ifElse,
+  join,
+  juxt,
+  map,
+  nth,
+  o,
+  path,
+  pipe,
+  prop,
+  propEq,
+  when,
+} = require('ramda');
 const { and, all } = require('../util/promise');
 const { text } = require('../util/template');
 const log = require('../util/log');
@@ -10,6 +38,10 @@ const TOKEN_PATH = joinPath(__dirname, 'token.json');
 const CREDENTIALS_PATH = joinPath(__dirname, 'credentials.json');
 
 const constructClient = converge(construct(EtsyOAuth), [prop('keystring'), prop('shared_secret'), prop('redirect_uri')]);
+
+const updateListing = (inventory) => evolve({
+
+});
 
 class Etsy {
   #shop;
@@ -46,12 +78,19 @@ class Etsy {
     return this.#client.get('/oauth/scopes');
   }
 
+  async #getListings() {
+    return this.#client.getAll(`/shops/${this.#shop}/listings/active`, { include_private: true });
+  }
+
+  async #getListing({ listing_id }) {
+    return this.#client.get(`/listings/${listing_id}/inventory`)
+  }
+
   async getInventory() {
-    const listings = await this.#client.getAll(`/shops/${this.#shop}/listings/active`, { include_private: true });
+    const listings = await this.#getListings();
     return Promise
       .all(listings
-        .map(and((listing) => this.#client
-          .get(`/listings/${listing.listing_id}/inventory`)
+        .map(and((listing) => this.#getListing(listing)
           .then(path(['results', 'products']))
           .then(map(applySpec({
             name: pipe(
@@ -63,6 +102,25 @@ class Etsy {
             quantity: path(['offerings', 0, 'quantity']),
           }))))))
       .then(chain(([listing, products]) => products.map(evolve({ name: concat(listing.title) }))));
+  }
+
+  async setInventory(inventory) {
+    const listings = await this.#getListings();
+    await Promise
+      .all(listings
+        .map((listing) => this.#getListing(listing)
+          .then(prop('results'))
+          .then(and(evolve({
+            products: map(converge((inv, prod) => inv && prod.sku ? assocPath(['offerings', 0, 'quantity'], inv.quantity, prod) : prod, [
+              compose(find(__, inventory), propEq('sku'), prop('sku')),
+              identity,
+            ])),
+          })))
+          .then(when(apply(complement(equals)), pipe(
+            nth(1),
+            evolve({ products: JSON.stringify }),
+            (updated) => this.#client.put(`/listings/${listing.listing_id}/inventory`, updated),
+          )))));
   }
 }
 

@@ -1,6 +1,6 @@
 const { OAuth } = require('oauth');
-const Queue = require('../util/ratelimit');
 const qs = require('qs');
+const Queue = require('../util/ratelimit');
 
 const API_URL = 'https://openapi.etsy.com/v2';
 const url = (endpoint, args = {}) => `${API_URL}${endpoint}${qs.stringify(args, { addQueryPrefix: true })}`;
@@ -54,6 +54,15 @@ class EtsyOAuth {
   async get(endpoint, args = {}) {
     return this.#queue.schedule(() => new Promise((resolve, reject) => {
       this.#oauth.get(url(endpoint, args), this.#token, this.#secret, (error, result) => {
+        if (error) { return reject(error); }
+        resolve(JSON.parse(result));
+      });
+    }));
+  }
+
+  async put(endpoint, body) {
+    return this.#queue.schedule(() => new Promise((resolve, reject) => {
+      this.#oauth.put(url(endpoint), this.#token, this.#secret, body, 'application/x-www-form-urlencoded', (error, result) => {
         if (error) { return reject(error); }
         resolve(JSON.parse(result));
       });

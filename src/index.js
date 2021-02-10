@@ -17,10 +17,13 @@ const app = new Koa();
 
 const actions = (service) => html`
   <button onclick='${service}.pull()'>
-    Pull
+    Pull (new spreadsheet)
+  </button>
+  <button onclick='${service}.push()'>
+    Push (to shop)
   </button>
   <button onclick='${service}.sync()'>
-    Sync
+    Sync (overwrite spreadsheet)
   </button>
 `;
 

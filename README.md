@@ -65,8 +65,8 @@ functions are as follows:
     page of the spreadsheet. Ensure that the quantities from that service are correct (e.g. by using
     Pull) before using this, as it will overwrite any existing quantities. This feature is not
     likely to be used often, especially once inventory is being updated automatically.
-3.  Push (Google only): Push inventory data from the spreadsheet to each other service. Use this
-    after making manual changes to the spreadsheet, such as when you have restocked some items.
+3.  Push: Push inventory data from the spreadsheet to the service. Use this after making manual 
+    changes to the spreadsheet, such as when you have restocked some items.
 
 ## Data format
 

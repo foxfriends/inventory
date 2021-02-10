@@ -48,6 +48,16 @@ const template = (formatter) => async (ctx) => {
             border-radius: 3px;
           }
 
+          button,
+          input[type='submit'] {
+            margin: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            background-image: linear-gradient(to bottom, #ECE9E6 0%, #EEEEEE  35%, #ECE9E6  100%);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            cursor: pointer;
+          }
+
           form { width: 100%; }
 
           label {
@@ -114,6 +124,7 @@ const template = (formatter) => async (ctx) => {
           var etsy = {
             sync: () => post('/etsy/sync'),
             pull: () => post('/etsy/pull'),
+            push: () => post('/etsy/push'),
           };
         </script>
       </body>
