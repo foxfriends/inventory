@@ -26,6 +26,12 @@ const actions = (service) => html`
   <button onclick='${service}.sync()'>
     Sync (overwrite spreadsheet)
   </button>
+  <button onclick='${service}.hookInit()'>
+    Watch orders
+  </button>
+  <button onclick='${service}.hookRemove()'>
+    Stop watching orders
+  </button>
 `;
 
 const authorize = (service) => html`
@@ -39,8 +45,10 @@ const service = (service) => ifElse(path([service, 'ready']), actions(service), 
 const googleSettings = html`
   <form method='POST' action='/google/settings'>
     <label>
-      <div>Spreadsheet ID (open your inventory sheet in Google Drive and paste the URL here)</div>
-      <input name='spreadsheet' placeholder='https://docs.google.com/spreadsheets/d/&lt;...&gt;/edit' type='text' value='${λ.google.setting('spreadsheet')}' />
+      <div>Inventory Spreadsheet ID (open your inventory sheet in Google Drive and paste the URL here)</div>
+      <input name='inventory' placeholder='https://docs.google.com/spreadsheets/d/&lt;...&gt;/edit' type='text' value='${λ.google.setting('inventory')}' />
+      <div>Orders Spreadsheet ID (open your orders sheet in Google Drive and paste the URL here)</div>
+      <input name='orders' placeholder='https://docs.google.com/spreadsheets/d/&lt;...&gt;/edit' type='text' value='${λ.google.setting('orders')}' />
     </label>
     <input type='submit' value='Save' />
   </form>

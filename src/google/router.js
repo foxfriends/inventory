@@ -1,6 +1,8 @@
 const Router = require('@koa/router');
-const { prop } = require('ramda');
+const { map, match, nth, pick, pipe, prop, startsWith, when } = require('ramda');
 const { html } = require('../util/template');
+
+const SHEET_URL_REGEX = /https:\/\/docs.google.com\/spreadsheets\/d\/(\w+)\/.*/i;
 
 module.exports = new Router()
   .get('/setup', async (ctx) => {
@@ -14,11 +16,11 @@ module.exports = new Router()
     ctx.redirect('/');
   })
   .post('/settings', async (ctx) => {
-    let { spreadsheet } = ctx.request.body;
-    if (spreadsheet.startsWith('https://')) {
-      [, spreadsheet] = spreadsheet.match(/https:\/\/docs.google.com\/spreadsheets\/d\/(\w+)\/.*/i);
-    }
-    await ctx.google.settings({ spreadsheet });
+    const settings = pipe(
+      pick(['inventory', 'orders']),
+      map(when(startsWith('https://'), pipe(match(SHEET_URL_REGEX), nth(1)))),
+    )(ctx.request.body);
+    await ctx.google.settings(settings);
     ctx.redirect('back', '/');
   })
   .get('/view', async (ctx) => {

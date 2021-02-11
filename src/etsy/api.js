@@ -29,7 +29,7 @@ const {
   propEq,
   when,
 } = require('ramda');
-const { and, all } = require('../util/promise');
+const { and } = require('../util/promise');
 const { text } = require('../util/template');
 const log = require('../util/log');
 const EtsyOAuth = require('./oauth');

@@ -22,7 +22,7 @@ class ShopifyOAuth2 {
       client_id: this.#clientId,
       scope: scopes.join(','),
       grant_options: [],
-      redirect_ir: this.#redirectUri,
+      redirect_uri: this.#redirectUri,
     });
     return `https://${this.#shop}.myshopify.com/admin/oauth/authorize?${query}`;
   }

@@ -40,7 +40,9 @@ Create the following files:
         "shop": "<shop_name>",
         "api_key": "<api_key>",
         "secret_key": "<secret_key>",
-        "redirect_uri": "<base_url>/shopify/oauth"
+        "redirect_uri": "<base_url>/shopify/oauth",
+        "orders_created_url": "<base_url>/shopify/hook/orders/create",
+        "orders_cancelled_url": "<base_url>/shopify/hook/orders/cancelled"
     }
     ```
 
@@ -52,9 +54,9 @@ Create the following files:
 
 Visit the server at `<base_url>` and you will be presented with the dashboard. Authorize each
 service by clicking the Authorize buttons, triggering their standard OAuth flows. Once all are
-authorized, also provide the URL of the inventory spreadsheet from your Google Drive in the box
-under the Google settings. This spreadsheet must be owned by the Google account you authorized
-in the previous step.
+authorized, also provide the URLs of the inventory and orders spreadsheets from your Google
+Drive in the boxes under the Google settings. This spreadsheets must be owned by the Google
+account you authorized in the previous step.
 
 Once all services are set up, you can use the buttons on the dashboard to control the app. The
 functions are as follows:
@@ -65,10 +67,16 @@ functions are as follows:
     page of the spreadsheet. Ensure that the quantities from that service are correct (e.g. by using
     Pull) before using this, as it will overwrite any existing quantities. This feature is not
     likely to be used often, especially once inventory is being updated automatically.
-3.  Push: Push inventory data from the spreadsheet to the service. Use this after making manual 
+3.  Push: Push inventory data from the spreadsheet to the service. Use this after making manual
     changes to the spreadsheet, such as when you have restocked some items.
+4.  Watch orders: Start watching for new orders. When a new order comes in inventory will be
+    decreased automatically and updated on all shops.
+5.  Stop watching orders: Stop watching for new orders. Orders will no longer decrease inventory and
+    update shops automatically, until started again.
 
 ## Data format
+
+### Inventory
 
 Ensure your products have the same SKUs across all your shops as it is by SKU that the inventory
 will be synchronized. The spreadsheet provided above must have, in the first page, columns with
@@ -83,3 +91,9 @@ the headers must be on the first row. For example, the following sheet would be 
 
 Ensure that all quantities are numbers. Any quantity that is not a number will be ignored. Any SKU that cannot be
 found will also be silently ignored.
+
+### Orders
+
+The orders spreadsheet is not really intended to be interacted with. It is just kept as a way of
+auditing the changes made to your inventory. Leave it blank, and don't worry too much about the 
+contents unless something goes wrong.

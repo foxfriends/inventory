@@ -3,23 +3,32 @@ const { promises: fs } = require('fs');
 const { join } = require('path');
 const { OAuth } = require('oauth');
 const { always, apply, applySpec, construct, converge, last, map, prop, propEq, path } = require('ramda');
-const { and } = require('../util/promise');
+const { all, and } = require('../util/promise');
 const log = require('../util/log');
+const { HooksExistError } = require('./errors');
 
 const GET_INVENTORY = require('./queries/getInventory');
+const UPDATE_INVENTORY = require('./queries/updateInventory');
+const REGISTER_FOR_WEBHOOKS = require('./queries/registerForWebhooks');
+const CHECK_WEBHOOKS = require('./queries/checkWebhooks');
+const UNREGISTER_WEBHOOK = require('./queries/unregisterWebhook');
 
 const ShopifyOAuth2 = require('./oauth');
 
 const CREDENTIALS_PATH = join(__dirname, 'credentials.json');
 const TOKEN_PATH = join(__dirname, 'token.json');
-const SCOPES = ['read_products', 'write_inventory'];
+const SCOPES = ['read_products', 'write_inventory', 'read_orders'];
 
 const constructClient = converge(construct(ShopifyOAuth2), [prop('shop'), prop('api_key'), prop('secret_key'), prop('redirect_uri')]);
 
 class Shopify {
   #client;
+  #orderCancelledCallback;
+  #orderCreatedCallback;
 
-  constructor(client, token) {
+  constructor(client, token, credentials) {
+    this.#orderCancelledCallback = credentials.orders_cancelled_url;
+    this.#orderCreatedCallback = credentials.orders_created_url;
     this.#client = client;
     this.#setCredentials(token);
   }
@@ -93,6 +102,28 @@ class Shopify {
       after = last(location.inventoryLevels.edges).cursor;
     }
   }
+
+  async registerForWebhooks() {
+    const { createOrdersHook, cancelOrdersHook } = await this.#client
+      .graphql(REGISTER_FOR_WEBHOOKS, {
+        createCallback: this.#orderCreatedCallback,
+        cancelledCallback: this.#orderCancelledCallback,
+      })
+      .then(prop('data'));
+    if (createOrdersHook.userErrors?.length || cancelOrdersHook.userErrors?.length) {
+      console.log(createOrdersHook.userErrors);
+      console.log(cancelOrdersHook.userErrors);
+      throw new HooksExistError;
+    }
+  }
+
+  async unregisterForWebhooks() {
+    await this.#client.graphql(CHECK_WEBHOOKS)
+      .then(path(['data', 'webhookSubscriptions', 'edges']))
+      .then(map(path(['node', 'id'])))
+      .then(map((id) => this.#client.graphql(UNREGISTER_WEBHOOK, { id })))
+      .then(all);
+  }
 }
 
 const token = fs
@@ -100,9 +131,11 @@ const token = fs
   .then(JSON.parse)
   .catch(always(undefined));
 
-module.exports = fs
+const credentials = fs
   .readFile(CREDENTIALS_PATH)
-  .then(JSON.parse)
+  .then(JSON.parse);
+
+module.exports = credentials
   .then(constructClient)
-  .then(and(always(token)))
+  .then(and(always(token), always(credentials)))
   .then(apply(construct(Shopify)));

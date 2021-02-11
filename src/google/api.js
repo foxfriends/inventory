@@ -66,7 +66,7 @@ class Google {
   }
 
   async #columnIndexes() {
-    const spreadsheetId = await this.setting('spreadsheet');
+    const spreadsheetId = await this.setting('inventory');
     const spreadsheet = await sheets.spreadsheets
       .get({ spreadsheetId, auth: this.#client })
       .then(prop('data'));
@@ -86,7 +86,7 @@ class Google {
   }
 
   async getInventory() {
-    const spreadsheetId = await this.setting('spreadsheet');
+    const spreadsheetId = await this.setting('inventory');
     const GET_PARAMS = {
       spreadsheetId,
       valueRenderOption: 'UNFORMATTED_VALUE',
@@ -108,7 +108,7 @@ class Google {
   }
 
   async pushInventory(source, inventory) {
-    const spreadsheetId = await this.setting('spreadsheet');
+    const spreadsheetId = await this.setting('inventory');
     const title = `${source} ${DateTime.local().toFormat('yyyy-MM-dd HH:mm:ss')}`;
     const PARAMS = {
       spreadsheetId,
@@ -149,7 +149,7 @@ class Google {
       })));
     const { skuColumn, quantityColumn } = await this.#columnIndexes();
 
-    const spreadsheetId = await this.setting('spreadsheet');
+    const spreadsheetId = await this.setting('inventory');
     const PARAMS = {
       spreadsheetId,
       auth: this.#client,
@@ -173,6 +173,24 @@ class Google {
         },
         ...PARAMS,
       });
+  }
+
+  async logOrder(source, action, data) {
+    const spreadsheetId = await this.setting('orders');
+    const range = new A1(1, 1, 1, 3).toString();
+    await sheets.spreadsheets.values
+      .append({
+        spreadsheetId,
+        range,
+        valueInputOption: 'RAW',
+        insertDataOption: 'INSERT_ROWS',
+        auth: this.#client,
+        resource: {
+          range,
+          majorDimension: 'ROWS',
+          values: [[source, action, JSON.stringify(data)]],
+        },
+      })
   }
 }
 

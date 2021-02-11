@@ -1,4 +1,5 @@
 const Router = require('@koa/router');
+const { HooksExistError } = require('./errors');
 
 const ONE_HOUR = 60 * 60 * 1000;
 
@@ -38,6 +39,33 @@ module.exports = new Router()
   .post('/push', async (ctx) => {
     const inventory = await ctx.google.getInventory();
     await ctx.shopify.setInventory(inventory);
+    ctx.status = 200;
+    ctx.body = 'Ok';
+  })
+  .post('/hook/init', async (ctx) => {
+    try {
+      await ctx.shopify.registerForWebhooks();
+      ctx.status = 200;
+      ctx.body = 'Ok';
+    } catch (error) {
+      if (error instanceof HooksExistError) {
+        ctx.throw(409, 'Hooks already set up');
+      }
+      throw error;
+    }
+  })
+  .post('/hook/remove', async (ctx) => {
+    await ctx.shopify.unregisterForWebhooks();
+    ctx.status = 200;
+    ctx.body = 'Ok';
+  })
+  .post('/hook/orders/create', async (ctx) => {
+    await ctx.google.logOrder('Shopify', 'Created', ctx.request.body);
+    ctx.status = 200;
+    ctx.body = 'Ok';
+  })
+  .post('/hook/orders/cancelled', async (ctx) => {
+    await ctx.google.logOrder('Shopify', 'Cancelled', ctx.request.body);
     ctx.status = 200;
     ctx.body = 'Ok';
   });

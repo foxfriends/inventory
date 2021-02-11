@@ -110,7 +110,7 @@ const template = (formatter) => async (ctx) => {
         
           const post = (url) => {
             show();
-            fetch(url, { method: 'POST' })
+            fetch(url, { method: 'POST', headers: { Accept: 'text/plain' } })
               .then(res => res.text())
               .then(alert)
               .then(hide)
@@ -120,6 +120,8 @@ const template = (formatter) => async (ctx) => {
             sync: () => post('/shopify/sync'),
             pull: () => post('/shopify/pull'),
             push: () => post('/shopify/push'),
+            hookInit: () => post('/shopify/hook/init'),
+            hookRemove: () => post('/shopify/hook/remove'),
           };
 
           var etsy = {
