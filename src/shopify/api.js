@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const { promises: fs } = require('fs');
 const { join } = require('path');
 const { OAuth } = require('oauth');
-const { always, apply, applySpec, construct, converge, last, map, prop, path } = require('ramda');
+const { always, apply, applySpec, construct, converge, last, map, prop, propEq, path } = require('ramda');
 const { and } = require('../util/promise');
 const log = require('../util/log');
 
@@ -48,26 +48,50 @@ class Shopify {
   }
 
   async getInventory() {
-    // TODO: we only support one location for now.
-    const inventoryLevels = await this.#client
-      .graphql(GET_INVENTORY)
-      .then(path(['data', 'locations', 'edges', 0, 'node', 'inventoryLevels']));
+    const inventoryLevels = [];
 
-    while (inventoryLevels.pageInfo.hasNextPage) {
+    for (let after = null;;) {
+      // TODO: we only support one location for now.
       const page = await this.#client
-        .graphql(GET_INVENTORY, { after: last(inventoryLevels.edges).cursor })
+        .graphql(GET_INVENTORY, { after })
         .then(path(['data', 'locations', 'edges', 0, 'node', 'inventoryLevels']));
-      inventoryLevels.pageInfo = page.pageInfo;
-      inventoryLevels.edges.push(...page.edges);
+      inventoryLevels.push(...page.edges);
+      if (!page.pageInfo.hasNextPage) { break; }
+      after = last(inventoryLevels).cursor;
     }
 
     return inventoryLevels
-      .edges
       .map(applySpec({
         name: path(['node', 'item', 'variant', 'displayName']),
         sku: path(['node', 'item', 'sku']),
         quantity: path(['node', 'available']),
       }));
+  }
+
+  async setInventory(inventory) {
+    for (let after = null;;) {
+      const location = await this.#client
+        .graphql(GET_INVENTORY, { after })
+        .then(path(['data', 'locations', 'edges', 0, 'node']));
+
+      const adjustments = location
+        .inventoryLevels
+        .edges
+        .map(applySpec({
+          id: path(['node', 'id']),
+          sku: path(['node', 'item', 'sku']),
+          available: path(['node', 'available']),
+        }))
+        .map(({ id, sku, available }) => ({
+          inventoryItemId: id,
+          availableDelta: (inventory.find(propEq('sku', sku))?.quantity ?? available) - available,
+        }))
+        .filter(prop('availableDelta'));
+      // await this.#client.graphql(UPDATE_INVENTORY, { location: location.id, adjustments });
+
+      if (!location.inventoryLevels.pageInfo.hasNextPage) { return; }
+      after = last(location.inventoryLevels.edges).cursor;
+    }
   }
 }
 

@@ -119,6 +119,7 @@ const template = (formatter) => async (ctx) => {
           var shopify = {
             sync: () => post('/shopify/sync'),
             pull: () => post('/shopify/pull'),
+            push: () => post('/shopify/push'),
           };
 
           var etsy = {

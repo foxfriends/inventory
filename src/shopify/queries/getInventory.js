@@ -7,12 +7,13 @@ module.exports = graphql`
       edges {
         cursor
         node {
-          name
+          id
           inventoryLevels(first: 50, after: $after) {
             pageInfo { hasNextPage }
             edges {
               cursor
               node {
+                id
                 available
                 item {
                   sku

@@ -34,4 +34,10 @@ module.exports = new Router()
     await ctx.google.setInventory(inventory);
     ctx.status = 200;
     ctx.body = 'Ok';
+  })
+  .post('/push', async (ctx) => {
+    const inventory = await ctx.google.getInventory();
+    await ctx.shopify.setInventory(inventory);
+    ctx.status = 200;
+    ctx.body = 'Ok';
   });
