@@ -104,12 +104,15 @@ class Shopify {
   }
 
   async registerForWebhooks() {
-    const { createOrdersHook, cancelOrdersHook } = await this.#client
+    const { data, errors } = await this.#client
       .graphql(REGISTER_FOR_WEBHOOKS, {
         createCallback: this.#orderCreatedCallback,
         cancelledCallback: this.#orderCancelledCallback,
-      })
-      .then(prop('data'));
+      });
+    if (errors?.length) {
+      throw new Error(errors.map(prop('message')).join('. '));
+    }
+    const { createOrdersHook, cancelOrdersHook } = data;
     if (createOrdersHook.userErrors?.length || cancelOrdersHook.userErrors?.length) {
       console.log(createOrdersHook.userErrors);
       console.log(cancelOrdersHook.userErrors);
