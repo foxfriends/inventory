@@ -114,8 +114,6 @@ class Shopify {
     }
     const { createOrdersHook, cancelOrdersHook } = data;
     if (createOrdersHook.userErrors?.length || cancelOrdersHook.userErrors?.length) {
-      console.log(createOrdersHook.userErrors);
-      console.log(cancelOrdersHook.userErrors);
       throw new HooksExistError;
     }
   }
