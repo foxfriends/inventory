@@ -1,6 +1,6 @@
 const { default: formurlencoded } = require('form-urlencoded');
+const qs = require('qs');
 const bent = require('bent');
-const log = require('../util/log');
 const graphql = require('./queries/tag');
 
 class ShopifyOAuth2 {
@@ -18,15 +18,21 @@ class ShopifyOAuth2 {
   }
 
   generateAuthUrl(secret, scopes) {
-    return `https://${this.#shop}.myshopify.com/admin/oauth/authorize?client_id=${this.#clientId}&scope=${scopes.join(',')}&state=${secret}&grant_options[]=&redirect_uri=${this.#redirectUri}`;
+    const query = qs.stringify({
+      client_id: this.#clientId,
+      scope: scopes.join(','),
+      grant_options: [],
+      redirect_ir: this.#redirectUri,
+    });
+    return `https://${this.#shop}.myshopify.com/admin/oauth/authorize?${query}`;
   }
 
   async getToken(code) {
-    return bent('POST', 'json', `https://${this.#shop}.myshopify.com`)('/admin/oauth/access_token', log.debug(formurlencoded({
+    return bent('POST', 'json', `https://${this.#shop}.myshopify.com`)('/admin/oauth/access_token', formurlencoded({
       client_id: this.#clientId,
       client_secret: this.#clientSecret,
       code,
-    })), { 'Content-Type': 'application/x-www-form-urlencoded' });
+    }), { 'Content-Type': 'application/x-www-form-urlencoded' });
   }
 
   setCredentials({ access_token }) {

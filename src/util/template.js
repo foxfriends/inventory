@@ -126,6 +126,12 @@ const template = (formatter) => async (ctx) => {
             pull: () => post('/etsy/pull'),
             push: () => post('/etsy/push'),
           };
+
+          var etsy3 = {
+            sync: () => post('/etsy3/sync'),
+            pull: () => post('/etsy3/pull'),
+            push: () => post('/etsy3/push'),
+          };
         </script>
       </body>
     </html>

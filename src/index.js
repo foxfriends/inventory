@@ -8,6 +8,7 @@ const { ifElse, path } = require('ramda');
 
 const google = require('./google');
 const etsy = require('./etsy');
+const etsy3 = require('./etsy3');
 const shopify = require('./shopify');
 
 const { html, template } = require('./util/template');
@@ -50,6 +51,7 @@ const googleSection = ifElse(path(['google', 'ready']), googleSettings, authoriz
 const router = new Router()
   .use('/google', google.routes(), google.allowedMethods())
   .use('/etsy', etsy.routes(), etsy.allowedMethods())
+  .use('/etsy3', etsy3.routes(), etsy3.allowedMethods())
   .use('/shopify', shopify.routes(), shopify.allowedMethods())
   .get('/', template(html`
     <main>
@@ -76,6 +78,7 @@ app
   .use(bodyparser())
   .use(google())
   .use(etsy())
+  .use(etsy3())
   .use(shopify())
   .use(router.routes())
   .use(router.allowedMethods())
