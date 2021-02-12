@@ -26,6 +26,7 @@
   "dependencies": {
     "@flighter/a1-notation": "^1.0.7",
     "@koa/router": "^10.0.0",
+    "basic-auth": "^2.0.1",
     "bent": "^7.3.12",
     "dot": "^2.0.0-beta.1",
     "form-urlencoded": "^4.2.1",
@@ -38,7 +39,8 @@
     "oauth": "^0.9.15",
     "qs": "^6.9.6",
     "ramda": "^0.27.1",
-    "tidy-template": "^1.0.7"
+    "tidy-template": "^1.0.7",
+    "tsscmp": "^1.0.6"
   },
   "devDependencies": {
     "nodemon": "^2.0.7"
@@ -48,7 +50,8 @@
       "src/google/token.json",
       "src/google/settings.json",
       "src/etsy/token.json",
-      "src/shopify/token.json"
+      "src/shopify/token.json",
+      "src/settings.json"
     ]
   }
 }

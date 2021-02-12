@@ -65,7 +65,8 @@ const template = (formatter) => async (ctx) => {
             margin: 10px 0;
           }
 
-          input[type='text'] {
+          input[type='text'],
+          input[type='password'] {
             font-family: monospace;
             box-sizing: border-box;
             display: block;

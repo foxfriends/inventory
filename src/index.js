@@ -3,9 +3,9 @@ const error = require('koa-error');
 const Router = require('@koa/router');
 const logger = require('koa-logger');
 const bodyparser = require('koa-bodyparser');
-
 const { ifElse, path } = require('ramda');
 
+const auth = require('./auth');
 const google = require('./google');
 const etsy = require('./etsy');
 const etsy3 = require('./etsy3');
@@ -47,6 +47,8 @@ const googleSettings = html`
     <label>
       <div>Inventory Spreadsheet ID (open your inventory sheet in Google Drive and paste the URL here)</div>
       <input name='inventory' placeholder='https://docs.google.com/spreadsheets/d/&lt;...&gt;/edit' type='text' value='${λ.google.setting('inventory')}' />
+    </label>
+    <label>
       <div>Orders Spreadsheet ID (open your orders sheet in Google Drive and paste the URL here)</div>
       <input name='orders' placeholder='https://docs.google.com/spreadsheets/d/&lt;...&gt;/edit' type='text' value='${λ.google.setting('orders')}' />
     </label>
@@ -61,6 +63,15 @@ const router = new Router()
   .use('/etsy', etsy.routes(), etsy.allowedMethods())
   .use('/etsy3', etsy3.routes(), etsy3.allowedMethods())
   .use('/shopify', shopify.routes(), shopify.allowedMethods())
+  .post('/settings', async (ctx) => {
+    const { name, pass } = ctx.request.body;
+    try {
+      await ctx.setCredentials(name, pass);
+      ctx.redirect('back', '/');
+    } catch (error) {
+      ctx.throw(400, 'Invalid settings');
+    }
+  })
   .get('/', template(html`
     <main>
       <section class='shopify'>
@@ -77,12 +88,28 @@ const router = new Router()
         <h1>Google</h1>
         ${googleSection}
       </section>
+
+      <section class='settings'>
+        <h1>Settings</h1>
+        <form method='POST' action='/settings'>
+          <label>
+            <div>Username</div>
+            <input type='text' name='name' placeholder='Username' />
+          </label>
+          <label>
+            <div>Password</div>
+            <input type='password' name='pass' placeholder='Password' />
+          </label>
+          <input type='submit' value='Update Credentials' />
+        </form>
+      </section>
     </main>
   `));
 
 app
   .use(error())
   .use(logger())
+  .use(auth())
   .use(bodyparser())
   .use(google())
   .use(etsy())
