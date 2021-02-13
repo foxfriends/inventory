@@ -60,12 +60,12 @@ module.exports = new Router()
     ctx.body = 'Ok';
   })
   .post('/hook/orders/create', async (ctx) => {
-    await ctx.google.logOrder('Shopify', 'Created', ctx.request.body);
+    await ctx.google.logOrders('Shopify', 'Created', [[ctx.request.body, { orderedAt: DateTime.local(), items: [] }]]);
     ctx.status = 200;
     ctx.body = 'Ok';
   })
   .post('/hook/orders/cancelled', async (ctx) => {
-    await ctx.google.logOrder('Shopify', 'Cancelled', ctx.request.body);
+    await ctx.google.logOrders('Shopify', 'Cancelled', [[ctx.request.body, { orderedAt: DateTime.local(), items: [] }]]);
     ctx.status = 200;
     ctx.body = 'Ok';
   });

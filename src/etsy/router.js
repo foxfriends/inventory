@@ -43,4 +43,20 @@ module.exports = new Router()
     await ctx.etsy.setInventory(inventory);
     ctx.status = 200;
     ctx.body = 'Ok';
+  })
+  .post('/hook/init', async (ctx) => {
+    await ctx.etsy.startWatchingOrders();
+    ctx.status = 200;
+    ctx.body = 'Ok';
+  })
+  .post('/hook/remove', async (ctx) => {
+    await ctx.etsy.stopWatchingOrders();
+    ctx.status = 200;
+    ctx.body = 'Ok';
+  })
+  .post('/orders', async (ctx) => {
+    const orders = await ctx.etsy.checkOrders();
+    await ctx.google.logOrders('Etsy', 'Created', orders);
+    ctx.status = 200;
+    ctx.body = 'Ok';
   });

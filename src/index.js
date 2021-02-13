@@ -82,6 +82,9 @@ const router = new Router()
       <section class='etsy'>
         <h1>Etsy</h1>
         ${service('etsy')}
+        <button onclick='etsy.orders()'>
+          Check Orders
+        </button>
       </section>
 
       <section class='google'>

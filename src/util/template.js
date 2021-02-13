@@ -129,6 +129,9 @@ const template = (formatter) => async (ctx) => {
             sync: () => post('/etsy/sync'),
             pull: () => post('/etsy/pull'),
             push: () => post('/etsy/push'),
+            hookInit: () => post('/etsy/hook/init'),
+            hookRemove: () => post('/etsy/hook/remove'),
+            orders: () => post('/etsy/orders'),
           };
 
           var etsy3 = {

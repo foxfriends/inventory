@@ -28,6 +28,7 @@
     "@koa/router": "^10.0.0",
     "basic-auth": "^2.0.1",
     "bent": "^7.3.12",
+    "cron": "^1.8.2",
     "dot": "^2.0.0-beta.1",
     "form-urlencoded": "^4.2.1",
     "googleapis": "^67.0.0",
@@ -50,7 +51,11 @@
       "src/google/token.json",
       "src/google/settings.json",
       "src/etsy/token.json",
+      "src/etsy/settings.json",
+      "src/etsy3/token.json",
+      "src/etsy3/settings.json",
       "src/shopify/token.json",
+      "src/shopify/settings.json",
       "src/settings.json"
     ]
   }

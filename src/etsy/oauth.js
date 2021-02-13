@@ -16,7 +16,7 @@ class EtsyOAuth {
 
   constructor(clientId, clientSecret, redirectUri) {
     this.#oauth = new OAuth(
-      'https://openapi.etsy.com/v2/oauth/request_token?scope=listings_r%20listings_w',
+      'https://openapi.etsy.com/v2/oauth/request_token?scope=listings_r%20listings_w%20transactions_r',
       'https://openapi.etsy.com/v2/oauth/access_token',
       clientId,
       clientSecret,

@@ -175,8 +175,15 @@ class Google {
       });
   }
 
-  async logOrder(source, action, data) {
+  async logOrders(source, action, orders) {
     const spreadsheetId = await this.setting('orders');
+    const values = orders.map(([raw, { orderedAt, items }]) => ([
+      source,
+      action,
+      orderedAt.toISO(),
+      JSON.stringify(items),
+      JSON.stringify(raw),
+    ]));
     const range = new A1(1, 1, 1, 3).toString();
     await sheets.spreadsheets.values
       .append({
@@ -188,7 +195,7 @@ class Google {
         resource: {
           range,
           majorDimension: 'ROWS',
-          values: [[source, action, JSON.stringify(data)]],
+          values,
         },
       })
   }

@@ -1,5 +1,7 @@
 const { join: joinPath } = require('path');
 const { promises: fs } = require('fs');
+const { CronJob } = require('cron');
+const { DateTime } = require('luxon');
 const {
   __,
   always,
@@ -29,13 +31,15 @@ const {
   propEq,
   when,
 } = require('ramda');
-const { and } = require('../util/promise');
+const { all, and } = require('../util/promise');
 const { text } = require('../util/template');
 const log = require('../util/log');
 const EtsyOAuth = require('./oauth');
+const google = require('../google/api');
 
 const TOKEN_PATH = joinPath(__dirname, 'token.json');
 const CREDENTIALS_PATH = joinPath(__dirname, 'credentials.json');
+const SETTINGS_PATH = joinPath(__dirname, 'settings.json');
 
 const constructClient = converge(construct(EtsyOAuth), [prop('keystring'), prop('shared_secret'), prop('redirect_uri')]);
 
@@ -46,11 +50,13 @@ const updateListing = (inventory) => evolve({
 class Etsy {
   #shop;
   #client;
+  #ordersCron;
   
   constructor(client, token, credentials) {
     this.#shop = credentials.shop;
     this.#client = client;
     this.#setCredentials(token);
+    this.#resumeWatchingOrders();
   }
 
   #ready = false;
@@ -76,6 +82,25 @@ class Etsy {
 
   async checkAuth() {
     return this.#client.get('/oauth/scopes');
+  }
+
+  async setting(name) {
+    return this
+      .settings()
+      .then(prop(name));
+  }
+
+  #settings;
+  async settings(newSettings) {
+    this.#settings = this.#settings || await fs
+      .readFile(SETTINGS_PATH)
+      .then(JSON.parse)
+      .catch(always({}));
+    if (newSettings) {
+      Object.assign(this.#settings, newSettings);
+      await fs.writeFile(SETTINGS_PATH, JSON.stringify(this.#settings));
+    }
+    return this.#settings;
   }
 
   async #getListings() {
@@ -121,6 +146,56 @@ class Etsy {
             evolve({ products: JSON.stringify }),
             (updated) => this.#client.put(`/listings/${listing.listing_id}/inventory`, updated),
           )))));
+  }
+
+  async checkOrders() {
+    const lastCheck = await this.setting('watchOrders');
+    if (lastCheck) {
+      await this.settings({ watchOrders: DateTime.local().toISO() });
+    }
+    return this.#client
+      .getAll(`/shops/${this.#shop}/receipts`, {
+        includes: 'Transactions',
+        min_created: ((lastCheck && DateTime.fromISO(lastCheck)) ?? DateTime.local().minus({ days: 1 })).toSeconds(),
+      })
+      .then(map(and(applySpec({
+        orderedAt: o(DateTime.fromSeconds, prop('creation_tsz')),
+        items: pipe(
+          prop('Transactions'),
+          map(applySpec({
+            quantity: prop('quantity'),
+            sku: path(['product_data', 'sku']),
+          })),
+        ),
+      }))))
+      .then(all);
+  }
+
+  async #resumeWatchingOrders() {
+    if (await this.setting('watchOrders')) {
+      this.startWatchingOrders();
+    }
+  }
+
+  async startWatchingOrders() {
+    if (!await this.setting('watchOrders')) {
+      await this.settings({ watchOrders: DateTime.local().toISO() });
+    }
+    if (!this.#ordersCron) {
+      this.#ordersCron = new CronJob('* * * * 0 0', async () => {
+        const orders = await this.checkOrders();
+        await google.then((google) => google.logOrders('Etsy', 'Created', orders));
+      });
+      this.#ordersCron.start();
+    }
+  }
+
+  async stopWatchingOrders() {
+    await this.settings({ watchOrders: null });
+    if (this.#ordersCron) {
+      this.#ordersCron.stop();
+      this.#ordersCron = null;
+    }
   }
 }
 
