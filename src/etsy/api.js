@@ -35,7 +35,6 @@ const { all, and } = require('../util/promise');
 const { text } = require('../util/template');
 const log = require('../util/log');
 const EtsyOAuth = require('./oauth');
-const google = require('../google/api');
 
 const TOKEN_PATH = joinPath(__dirname, 'token.json');
 const CREDENTIALS_PATH = joinPath(__dirname, 'credentials.json');
@@ -183,8 +182,9 @@ class Etsy {
     }
     if (!this.#ordersCron) {
       this.#ordersCron = new CronJob('* * * * 0 0', async () => {
+        const google = await require('../google/api');
         const orders = await this.checkOrders();
-        await google.then((google) => google.logOrders('Etsy', 'Created', orders));
+        await google.acceptOrders('Etsy', 'Created', orders);
       });
       this.#ordersCron.start();
     }

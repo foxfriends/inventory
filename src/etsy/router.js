@@ -56,7 +56,7 @@ module.exports = new Router()
   })
   .post('/orders', async (ctx) => {
     const orders = await ctx.etsy.checkOrders();
-    await ctx.google.logOrders('Etsy', 'Created', orders);
+    await ctx.google.acceptOrders('Etsy', 'Created', orders);
     ctx.status = 200;
     ctx.body = 'Ok';
   });

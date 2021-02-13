@@ -62,7 +62,7 @@ module.exports = new Router()
   })
   .post('/hook/orders/create', async (ctx) => {
     const order = ctx.shopify.processOrder(ctx.request.body);
-    await ctx.google.logOrders('Shopify', 'Created', [[ctx.request.body, order]]);
+    await ctx.google.acceptOrders('Shopify', 'Created', [[ctx.request.body, order]]);
     ctx.status = 200;
     ctx.body = 'Ok';
   })

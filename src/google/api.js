@@ -3,8 +3,9 @@ const { join } = require('path');
 const { promises: fs } = require('fs');
 const { DateTime } = require('luxon');
 const { google } = require('googleapis');
-const { add, always, apply, construct, converge, indexOf, juxt, path, prop, propEq, map, zipWith } = require('ramda');
+const { add, always, apply, construct, converge, indexOf, juxt, map, path, prop, propEq, when, zipWith } = require('ramda');
 const { and } = require('../util/promise');
+const { λ } = require('../util/keypath');
 const log = require('../util/log');
 
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
@@ -141,12 +142,15 @@ class Google {
     return updated;
   }
 
-  async setInventory(inventory) {
-    const newInventory = await this.getInventory()
-      .then(map(({ sku, quantity }) => ({
-        sku,
-        quantity: inventory.find(propEq('sku', sku))?.quantity ?? quantity
-      })));
+  async setInventory(inventory, force = false) {
+    const newInventory = force
+      ? inventory
+      : await this
+        .getInventory()
+        .then(map(({ sku, quantity }) => ({
+          sku,
+          quantity: inventory.find(propEq('sku', sku))?.quantity ?? quantity
+        })));
     const { skuColumn, quantityColumn } = await this.#columnIndexes();
 
     const spreadsheetId = await this.setting('inventory');
@@ -175,6 +179,25 @@ class Google {
       });
   }
 
+  async acceptOrders(source, action, orders) {
+    await this.logOrders(source, action, orders);
+    const inventory = await this.getInventory();
+    for (const { sku, quantity } of orders.flatMap(prop('items')).filter(prop('sku'))) {
+      const index = inventory.findIndex(propEq('sku', sku));
+      if (index !== -1) {
+        inventory[index].quantity = Math.max(0, inventory[index].quantity - quantity);
+      }
+    }
+    await this.setInventory(inventory, true);
+
+    /*
+    await Promise.all([
+      require('../etsy/api').then(when(prop('ready'), λ.setInventory(inventory))),
+      require('../shopify/api').then(when(prop('ready'), λ.setInventory(inventory))),
+    ]);
+    */
+  }
+
   async logOrders(source, action, orders) {
     const spreadsheetId = await this.setting('orders');
     const values = orders.map(([raw, { orderedAt, items }]) => ([
@@ -185,19 +208,18 @@ class Google {
       JSON.stringify(raw),
     ]));
     const range = new A1(1, 1, 1, 3).toString();
-    await sheets.spreadsheets.values
-      .append({
-        spreadsheetId,
+    await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range,
+      valueInputOption: 'RAW',
+      insertDataOption: 'INSERT_ROWS',
+      auth: this.#client,
+      resource: {
         range,
-        valueInputOption: 'RAW',
-        insertDataOption: 'INSERT_ROWS',
-        auth: this.#client,
-        resource: {
-          range,
-          majorDimension: 'ROWS',
-          values,
-        },
-      })
+        majorDimension: 'ROWS',
+        values,
+      },
+    });
   }
 }
 
