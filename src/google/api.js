@@ -207,7 +207,7 @@ class Google {
       JSON.stringify(items),
       JSON.stringify(raw),
     ]));
-    const range = new A1(1, 1, 1, 3).toString();
+    const range = new A1(1, 1, 1, 5).toString();
     await sheets.spreadsheets.values.append({
       spreadsheetId,
       range,
