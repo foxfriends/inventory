@@ -42,10 +42,6 @@ const SETTINGS_PATH = joinPath(__dirname, 'settings.json');
 
 const constructClient = converge(construct(EtsyOAuth), [prop('keystring'), prop('shared_secret'), prop('redirect_uri')]);
 
-const updateListing = (inventory) => evolve({
-
-});
-
 class Etsy {
   #shop;
   #client;
@@ -181,7 +177,7 @@ class Etsy {
       await this.settings({ watchOrders: DateTime.local().toISO() });
     }
     if (!this.#ordersCron) {
-      this.#ordersCron = new CronJob('* * * * 0 0', async () => {
+      this.#ordersCron = new CronJob('0 0 * * * *', async () => {
         const google = await require('../google/api');
         const orders = await this.checkOrders();
         await google.acceptOrders('Etsy', 'Created', orders);
