@@ -184,7 +184,10 @@ class Google {
   async acceptOrders(source, action, orders) {
     await this.logOrders(source, action, orders);
     const inventory = await this.getInventory();
-    for (const { sku, quantity } of orders.flatMap(prop('items')).filter(prop('sku'))) {
+    const orderItems = orders
+      .flatMap(path([1, 'items']))
+      .filter(prop('sku'));
+    for (const { sku, quantity } of orderItems) {
       const index = inventory.findIndex(propEq('sku', sku));
       if (index !== -1) {
         inventory[index].quantity = Math.max(0, inventory[index].quantity - quantity);
