@@ -189,13 +189,10 @@ class Google {
       }
     }
     await this.setInventory(inventory, true);
-
-    /*
     await Promise.all([
       require('../etsy/api').then(when(prop('ready'), λ.setInventory(inventory))),
       require('../shopify/api').then(when(prop('ready'), λ.setInventory(inventory))),
     ]);
-    */
   }
 
   async logOrders(source, action, orders) {

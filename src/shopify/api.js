@@ -97,7 +97,7 @@ class Shopify {
           availableDelta: (inventory.find(propEq('sku', sku))?.quantity ?? available) - available,
         }))
         .filter(prop('availableDelta'));
-      // await this.#client.graphql(UPDATE_INVENTORY, { location: location.id, adjustments });
+      await this.#client.graphql(UPDATE_INVENTORY, { location: location.id, adjustments });
 
       if (!location.inventoryLevels.pageInfo.hasNextPage) { return; }
       after = last(location.inventoryLevels.edges).cursor;
