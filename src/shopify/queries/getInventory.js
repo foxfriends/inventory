@@ -13,9 +13,9 @@ module.exports = graphql`
             edges {
               cursor
               node {
-                id
                 available
                 item {
+                  id
                   sku
                   variant { displayName }
                 }

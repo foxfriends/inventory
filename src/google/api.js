@@ -149,7 +149,9 @@ class Google {
         .getInventory()
         .then(map(({ sku, quantity }) => ({
           sku,
-          quantity: inventory.find(propEq('sku', sku))?.quantity ?? quantity
+          quantity: sku
+            ? inventory.find(propEq('sku', sku))?.quantity ?? quantity
+            : '',
         })));
     const { skuColumn, quantityColumn } = await this.#columnIndexes();
 
@@ -164,12 +166,12 @@ class Google {
           valueInputOption: 'RAW',
           data: [
             {
-              range: new A1(skuColumn, 2, inventory.length, 1).toString(),
+              range: new A1(skuColumn, 2, newInventory.length, 1).toString(),
               majorDimension: 'COLUMNS',
               values: [newInventory.map(prop('sku'))],
             },
             {
-              range: new A1(quantityColumn, 2, inventory.length, 1).toString(),
+              range: new A1(quantityColumn, 2, newInventory.length, 1).toString(),
               majorDimension: 'COLUMNS',
               values: [newInventory.map(prop('quantity'))],
             },

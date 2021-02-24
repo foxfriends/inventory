@@ -88,16 +88,23 @@ class Shopify {
         .inventoryLevels
         .edges
         .map(applySpec({
-          id: path(['node', 'id']),
+          id: path(['node', 'item', 'id']),
           sku: path(['node', 'item', 'sku']),
           available: path(['node', 'available']),
         }))
+        .filter(prop('sku'))
         .map(({ id, sku, available }) => ({
           inventoryItemId: id,
           availableDelta: (inventory.find(propEq('sku', sku))?.quantity ?? available) - available,
         }))
         .filter(prop('availableDelta'));
-      await this.#client.graphql(UPDATE_INVENTORY, { location: location.id, adjustments });
+
+      if (adjustments.length) {
+        const response = await this.#client.graphql(UPDATE_INVENTORY, { location: location.id, adjustments });
+        if (response.errors) {
+          log.error('shopify push')(JSON.stringify(response))
+        }
+      }
 
       if (!location.inventoryLevels.pageInfo.hasNextPage) { return; }
       after = last(location.inventoryLevels.edges).cursor;
