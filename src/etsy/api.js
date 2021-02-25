@@ -180,7 +180,9 @@ class Etsy {
       this.#ordersCron = new CronJob('0 0 * * * *', async () => {
         const google = await require('../google/api');
         const orders = await this.checkOrders();
-        await google.acceptOrders('Etsy', 'Created', orders);
+        if (orders.length) {
+          await google.acceptOrders('Etsy', 'Created', orders);
+        }
       });
       this.#ordersCron.start();
     }
