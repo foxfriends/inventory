@@ -1,6 +1,7 @@
 const Router = require('@koa/router');
 const { DateTime } = require('luxon');
 const { HooksExistError } = require('./errors');
+const log = require('../util/log');
 
 const ONE_HOUR = 60 * 60 * 1000;
 
@@ -61,25 +62,17 @@ module.exports = new Router()
     ctx.body = 'Ok';
   })
   .post('/hook/orders/create', async (ctx) => {
-    try {
-      const order = ctx.shopify.processOrder(ctx.request.body);
-      await ctx.google.acceptOrders('Shopify', 'Created', [[ctx.request.body, order]]);
-      ctx.status = 200;
-      ctx.body = 'Ok';
-    } catch (error) {
-      console.log(error);
-      ctx.status = 200;
-      ctx.body = 'Fail';
-    }
+    const order = ctx.shopify.processOrder(ctx.request.body);
+    ctx.status = 200;
+    ctx.body = 'Ok';
+    ctx.google
+      .acceptOrders('Shopify', 'Created', [[ctx.request.body, order]])
+      .catch(log.error('Failed to accept order from Shopify'));
   })
   .post('/hook/orders/cancelled', async (ctx) => {
-    try {
-      await ctx.google.logOrders('Shopify', 'Cancelled', [[ctx.request.body, { orderedAt: DateTime.local(), items: [] }]]);
-      ctx.status = 200;
-      ctx.body = 'Ok';
-    } catch (error) {
-      console.log(error);
-      ctx.status = 200;
-      ctx.body = 'Fail';
-    }
+    ctx.status = 200;
+    ctx.body = 'Ok';
+    ctx.google
+      .logOrders('Shopify', 'Cancelled', [[ctx.request.body, { orderedAt: DateTime.local(), items: [] }]])
+      .catch(log.error('Failed to log cancelled order from Shopify'));
   });
