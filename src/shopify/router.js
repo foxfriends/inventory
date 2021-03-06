@@ -61,13 +61,25 @@ module.exports = new Router()
     ctx.body = 'Ok';
   })
   .post('/hook/orders/create', async (ctx) => {
-    const order = ctx.shopify.processOrder(ctx.request.body);
-    await ctx.google.acceptOrders('Shopify', 'Created', [[ctx.request.body, order]]);
-    ctx.status = 200;
-    ctx.body = 'Ok';
+    try {
+      const order = ctx.shopify.processOrder(ctx.request.body);
+      await ctx.google.acceptOrders('Shopify', 'Created', [[ctx.request.body, order]]);
+      ctx.status = 200;
+      ctx.body = 'Ok';
+    } catch (error) {
+      console.log(error);
+      ctx.status = 200;
+      ctx.body = 'Fail';
+    }
   })
   .post('/hook/orders/cancelled', async (ctx) => {
-    await ctx.google.logOrders('Shopify', 'Cancelled', [[ctx.request.body, { orderedAt: DateTime.local(), items: [] }]]);
-    ctx.status = 200;
-    ctx.body = 'Ok';
+    try {
+      await ctx.google.logOrders('Shopify', 'Cancelled', [[ctx.request.body, { orderedAt: DateTime.local(), items: [] }]]);
+      ctx.status = 200;
+      ctx.body = 'Ok';
+    } catch (error) {
+      console.log(error);
+      ctx.status = 200;
+      ctx.body = 'Fail';
+    }
   });

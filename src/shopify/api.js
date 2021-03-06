@@ -3,7 +3,7 @@ const { promises: fs } = require('fs');
 const { join } = require('path');
 const { DateTime } = require('luxon');
 const { OAuth } = require('oauth');
-const { always, apply, applySpec, construct, converge, last, map, pick, prop, propEq, path } = require('ramda');
+const { always, apply, applySpec, complement, construct, converge, last, map, pick, prop, propEq, path } = require('ramda');
 const { all, and } = require('../util/promise');
 const log = require('../util/log');
 const { HooksExistError } = require('./errors');
@@ -114,7 +114,10 @@ class Shopify {
   processOrder(data) {
     return {
       orderedAt: DateTime.fromISO(data.created_at),
-      items: data.line_items.map(pick(['sku', 'quantity'])),
+      items: data
+        .line_items
+        .filter(complement(prop('tip')))
+        .map(pick(['sku', 'quantity'])),
     };
   }
 
