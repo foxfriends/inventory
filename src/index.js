@@ -4,6 +4,7 @@ const Router = require('@koa/router');
 const logger = require('koa-logger');
 const bodyparser = require('koa-bodyparser');
 const { ifElse, path } = require('ramda');
+const { DateTime } = require('luxon');
 
 const auth = require('./auth');
 const google = require('./google');
@@ -122,5 +123,6 @@ app
   .use(router.allowedMethods())
 
 const { PORT = 3000 } = process.env;
+console.log(`The time is ${DateTime.local().toString()}`);
 console.log(`Listening on http://localhost:${PORT}`);
 app.listen(PORT);
