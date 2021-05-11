@@ -1,6 +1,7 @@
 const { join: joinPath } = require('path');
 const { promises: fs } = require('fs');
 const { CronJob } = require('cron');
+const { decode } = require('html-entities');
 const { DateTime } = require('luxon');
 const {
   __,
@@ -27,6 +28,7 @@ const {
   o,
   path,
   pipe,
+  pluck,
   prop,
   propEq,
   when,
@@ -141,6 +143,13 @@ class Etsy {
             evolve({ products: JSON.stringify }),
             (updated) => this.#client.put(`/listings/${listing.listing_id}/inventory`, updated),
           )))));
+  }
+
+  async getAddresses() {
+    return this.#client
+      .getAll(`/shops/${this.#shop}/receipts/open`)
+      .then(pluck('formatted_address'))
+      .then(map(decode));
   }
 
   async checkOrders() {

@@ -1,4 +1,5 @@
 const Router = require('@koa/router');
+const { printAddresses } = require('../util/pdf');
 
 const ONE_HOUR = 60 * 60 * 1000;
 
@@ -59,4 +60,11 @@ module.exports = new Router()
     await ctx.google.acceptOrders('Etsy', 'Created', orders);
     ctx.status = 200;
     ctx.body = 'Ok';
+  })
+  .get('/addresses', async (ctx) => {
+    const addresses = await ctx.etsy.getAddresses();
+    const pdf = printAddresses(addresses, ctx.settings.returnaddress);
+    ctx.status = 200;
+    ctx.type = 'application/pdf';
+    ctx.body = pdf;
   });

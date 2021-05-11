@@ -7,6 +7,7 @@ const { ifElse, path } = require('ramda');
 const { DateTime } = require('luxon');
 
 const auth = require('./auth');
+const settings = require('./settings');
 const google = require('./google');
 const etsy = require('./etsy');
 const etsy3 = require('./etsy3');
@@ -36,6 +37,9 @@ const actions = (service) => html`
   <button onclick='${service}.orders()'>
     Check Orders
   </button>
+  <a href='/${service}/addresses' target='_blank'>
+    Print Addresses
+  </a>
 `;
 
 const authorize = (service) => html`
@@ -45,6 +49,7 @@ const authorize = (service) => html`
 `;
 
 const service = (service) => ifElse(path([service, 'ready']), actions(service), authorize(service));
+const setting = (setting) => path(['settings', setting]);
 
 const googleSettings = html`
   <form method='POST' action='/google/settings'>
@@ -68,9 +73,9 @@ const router = new Router()
   .use('/etsy3', etsy3.routes(), etsy3.allowedMethods())
   .use('/shopify', shopify.routes(), shopify.allowedMethods())
   .post('/settings', async (ctx) => {
-    const { name, pass } = ctx.request.body;
+    const { name, pass, returnaddress } = ctx.request.body;
     try {
-      await ctx.setCredentials(name, pass);
+      await ctx.setSettings({ name, pass, returnaddress });
       ctx.redirect('back', '/');
     } catch (error) {
       ctx.throw(400, 'Invalid settings');
@@ -98,13 +103,20 @@ const router = new Router()
         <form method='POST' action='/settings'>
           <label>
             <div>Username</div>
-            <input type='text' name='name' placeholder='Username' />
+            <input type='text' name='name' placeholder='Username' value='${setting("name")}' />
           </label>
           <label>
             <div>Password</div>
-            <input type='password' name='pass' placeholder='Password' />
+            <!-- It sure is sketchy to put the password in here like this, but I don't think anyone's looking... -->
+            <input type='password' name='pass' placeholder='Password' value='${setting("pass")}' />
           </label>
-          <input type='submit' value='Update Credentials' />
+          <label>
+            <div>Return Address</div>
+            <div>
+              <textarea name='returnaddress' placeholder='123 Example Street' rows='5'>${setting("returnaddress")}</textarea>
+            </div>
+          </label>
+          <input type='submit' value='Update' />
         </form>
       </section>
     </main>
@@ -113,6 +125,7 @@ const router = new Router()
 app
   .use(error())
   .use(logger())
+  .use(settings())
   .use(auth())
   .use(bodyparser())
   .use(google())

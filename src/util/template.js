@@ -22,7 +22,7 @@ const text = (strings, ...interpolations) => {
 const template = (formatter) => async (ctx) => {
   const body = await formatter(ctx);
   ctx.status = 200;
-  ctx.body = tidy`
+  ctx.body = `
     <!DOCTYPE HTML>
     <html lang='en'>
       <head>
