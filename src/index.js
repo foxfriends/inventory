@@ -2,7 +2,8 @@ const Koa = require('koa');
 const error = require('koa-error');
 const Router = require('@koa/router');
 const logger = require('koa-logger');
-const bodyparser = require('koa-bodyparser');
+const body = require('koa-body');
+const { promises: fs } = require('fs');
 const { ifElse, path } = require('ramda');
 const { DateTime } = require('luxon');
 
@@ -74,8 +75,14 @@ const router = new Router()
   .use('/shopify', shopify.routes(), shopify.allowedMethods())
   .post('/settings', async (ctx) => {
     const { name, pass, returnaddress } = ctx.request.body;
+    let logo = ctx.settings.logo;
+    if (ctx.request.files?.logo?.size) {
+      const { type, path } = ctx.request.files.logo;
+      const data = await fs.readFile(path, 'base64');
+      logo = `data:${type};base64,${data}`;
+    }
     try {
-      await ctx.setSettings({ name, pass, returnaddress });
+      await ctx.setSettings({ name, pass, returnaddress, logo });
       ctx.redirect('back', '/');
     } catch (error) {
       ctx.throw(400, 'Invalid settings');
@@ -100,7 +107,7 @@ const router = new Router()
 
       <section class='settings'>
         <h1>Settings</h1>
-        <form method='POST' action='/settings'>
+        <form method='POST' action='/settings' enctype='multipart/form-data'>
           <label>
             <div>Username</div>
             <input type='text' name='name' placeholder='Username' value='${setting("name")}' />
@@ -116,7 +123,28 @@ const router = new Router()
               <textarea name='returnaddress' placeholder='123 Example Street' rows='5'>${setting("returnaddress")}</textarea>
             </div>
           </label>
-          <input type='submit' value='Update' />
+          <label>
+            <div>Logo</div>
+            <input type='file' name='logo' id='logo-input' />
+            <img src='${setting("logo")}' id='logo-preview' />
+            <script>
+              const input = document.querySelector('#logo-input');
+              const preview = document.querySelector('#logo-preview');
+
+              input.addEventListener('change', () => {
+                const file = input.files[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.addEventListener('load', () => preview.src = reader.result);
+                  reader.readAsDataURL(file);
+                }
+              }, false);
+            </script>
+          </label>
+
+          <div>
+            <input type='submit' value='Update' />
+          </div>
         </form>
       </section>
     </main>
@@ -127,7 +155,12 @@ app
   .use(logger())
   .use(settings())
   .use(auth())
-  .use(bodyparser())
+  .use(body({
+    json: true,
+    multipart: true,
+    urlencoded: true,
+    formLimit: 1024 * 1024,
+  }))
   .use(google())
   .use(etsy())
   .use(etsy3())

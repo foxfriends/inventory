@@ -1,7 +1,7 @@
 const PDF = require('pdfkit');
 const path = require('path');
 
-const printAddresses = (addresses, returnAddress) => {
+const printAddresses = (addresses, { returnAddress, logo }) => {
   if (addresses.length === 0) {
     throw new Error('No orders were found');
   }
@@ -31,8 +31,19 @@ const printAddresses = (addresses, returnAddress) => {
     pdf.text(name, (width - w) / 2, (height - h) / 2, options);
     pdf.fontSize(12);
     pdf.text(lines.join('\n'), (width - w) / 2, (height - h) / 2 + nh, options);
-    pdf.fontSize(10);
-    pdf.text(returnAddress.trim(), 50, 50, options);
+
+    if (logo) {
+      pdf.image(logo, 32, 32, {
+        fit: [50, 50],
+        valign: 'center',
+        align: 'right',
+      })
+    }
+
+    if (returnAddress) {
+      pdf.fontSize(10);
+      pdf.text(returnAddress.trim(), 100, 32, options);
+    }
   }
   pdf.end();
   return pdf;

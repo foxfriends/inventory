@@ -63,7 +63,10 @@ module.exports = new Router()
   })
   .get('/addresses', async (ctx) => {
     const addresses = await ctx.etsy.getAddresses();
-    const pdf = printAddresses(addresses, ctx.settings.returnaddress);
+    const pdf = printAddresses(addresses, {
+      returnAddress: ctx.settings.returnaddress,
+      logo: ctx.settings.logo,
+    });
     ctx.status = 200;
     ctx.type = 'application/pdf';
     ctx.body = pdf;
