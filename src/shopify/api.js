@@ -8,6 +8,7 @@ const { all, and } = require('../util/promise');
 const log = require('../util/log');
 const { HooksExistError } = require('./errors');
 
+const ORDER_ADDRESSES = require('./queries/orderAddresses');
 const GET_INVENTORY = require('./queries/getInventory');
 const UPDATE_INVENTORY = require('./queries/updateInventory');
 const REGISTER_FOR_WEBHOOKS = require('./queries/registerForWebhooks');
@@ -119,6 +120,21 @@ class Shopify {
         .filter(complement(prop('tip')))
         .map(pick(['sku', 'quantity'])),
     };
+  }
+
+  async getAddresses() {
+    const addresses = [];
+    for (let after = null;;) {
+      const page = await this.#client
+        .graphql(ORDER_ADDRESSES, { after })
+        .then(path(['data', 'orders']));
+      console.log(page.edges.map(prop('node')));
+      addresses.push(...page.edges.map(path(['node', 'shippingAddress', 'formatted'])))
+      if (!page.pageInfo.hasNextPage) { break; }
+      after = last(page.edges)?.cursor;
+      if (!after) { break; }
+    }
+    return addresses;
   }
 
   async registerForWebhooks() {

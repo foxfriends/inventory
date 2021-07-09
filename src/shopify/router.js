@@ -2,6 +2,7 @@ const Router = require('@koa/router');
 const { DateTime } = require('luxon');
 const { HooksExistError } = require('./errors');
 const log = require('../util/log');
+const { printAddresses } = require('../util/pdf');
 
 const ONE_HOUR = 60 * 60 * 1000;
 
@@ -75,4 +76,15 @@ module.exports = new Router()
     ctx.google
       .logOrders('Shopify', 'Cancelled', [[ctx.request.body, { orderedAt: DateTime.local(), items: [] }]])
       .catch(log.error('Failed to log cancelled order from Shopify'));
+  })
+  .get('/addresses', async (ctx) => {
+    const addresses = await ctx.shopify.getAddresses();
+    const pdf = printAddresses(addresses, {
+      returnAddress: ctx.settings.returnaddress,
+      logo: ctx.settings.logo,
+    });
+    ctx.status = 200;
+    ctx.type = 'application/pdf';
+    ctx.body = pdf;
   });
+

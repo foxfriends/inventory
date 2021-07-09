@@ -31,6 +31,7 @@ const {
   pluck,
   prop,
   propEq,
+  split,
   when,
 } = require('ramda');
 const { all, and } = require('../util/promise');
@@ -149,7 +150,8 @@ class Etsy {
     return this.#client
       .getAll(`/shops/${this.#shop}/receipts/open`)
       .then(pluck('formatted_address'))
-      .then(map(decode));
+      .then(map(decode))
+      .then(map(split('\n')));
   }
 
   async checkOrders() {

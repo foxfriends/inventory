@@ -13,8 +13,7 @@ const printAddresses = (addresses, { returnAddress, logo }) => {
     margin: 0,
   });
   pdf.font(path.join(__dirname, '../../res/Montserrat-Medium.ttf'));
-  for (const address of addresses) {
-    const [name, ...lines] = address.split('\n');
+  for (const [name, ...lines] of addresses) {
     const options = { width, align: 'left' };
     const NAME_SIZE = 21;
 

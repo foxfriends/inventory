@@ -40,7 +40,11 @@ class ShopifyOAuth2 {
   }
 
   async graphql(query, variables) {
-    return this.#post('/admin/api/2021-01/graphql.json', { query, variables });
+    const result = await this.#post('/admin/api/2021-01/graphql.json', { query, variables });
+    if (result.errors) {
+      throw new Error(JSON.stringify(result.errors));
+    }
+    return result;
   }
 
   /**
