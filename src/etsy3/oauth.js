@@ -39,7 +39,6 @@ class EtsyOAuth2 {
       code,
       code_verifier: challenge,
     });
-    const headers = new Headers();
     return bent('POST', 'json', API_URL)(`/public/oauth/token?${query}`, body,  {
       'Content-Type': 'application/x-www-form-urlencoded',
     });
