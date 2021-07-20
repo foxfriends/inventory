@@ -25,7 +25,12 @@ class EtsyOAuth2 {
       redirect_uri: this.#redirectUri,
       scope: scopes.join(' '),
       state,
-      code_challenge: crypto.createHash('sha256').update(challenge).digest('base64'),
+      code_challenge: crypto
+        .createHash('sha256')
+        .update(challenge)
+        .digest('base64')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_');
       code_challenge_method: 'S256',
     });
     return `https://www.etsy.com/oauth/connect?${query}`;
@@ -39,7 +44,6 @@ class EtsyOAuth2 {
       code,
       code_verifier: challenge,
     });
-    console.log(body);
     return bent('POST', 'json', API_URL)(`/public/oauth/token`, body, {
       'Content-Type': 'application/x-www-form-urlencoded',
     });
