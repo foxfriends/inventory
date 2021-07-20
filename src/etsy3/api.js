@@ -41,7 +41,7 @@ class Etsy3 {
   }
 
   async auth(code, challenge) {
-    const authtoken = await this.#client.auth(code, challenge);
+    const authtoken = await this.#client.getToken(code, challenge);
     fs.writeFile(TOKEN_PATH, JSON.stringify(authtoken))
       .catch(log.error('Failed to save token'));
     this.#setCredentials(authtoken);
