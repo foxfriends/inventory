@@ -53,8 +53,9 @@ class EtsyOAuth {
 
   async get(endpoint, args = {}) {
     return this.#queue.schedule(() => new Promise((resolve, reject) => {
-      this.#oauth.get(url(endpoint, args), this.#token, this.#secret, (error, result) => {
+      this.#oauth.get(url(endpoint, args), this.#token, this.#secret, (error, result, response) => {
         if (error) { return reject(error); }
+        console.log(response);
         resolve(JSON.parse(result));
       });
     }));
