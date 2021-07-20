@@ -12,7 +12,7 @@ class EtsyOAuth {
   #redirectUri;
   #token;
   #secret;
-  #queue = new Queue(120); // Etsy has a rate limit of 10 requests per second, we give them a bit of a head start
+  #queue = new Queue(120); // Etsy has a rate limit of 14 requests per second, we give them a bit of a head start
 
   constructor(clientId, clientSecret, redirectUri) {
     this.#oauth = new OAuth(
@@ -62,8 +62,9 @@ class EtsyOAuth {
 
   async put(endpoint, body) {
     return this.#queue.schedule(() => new Promise((resolve, reject) => {
-      this.#oauth.put(url(endpoint), this.#token, this.#secret, body, 'application/x-www-form-urlencoded', (error, result) => {
+      this.#oauth.put(url(endpoint), this.#token, this.#secret, body, 'application/x-www-form-urlencoded', (error, result, response) => {
         if (error) { return reject(error); }
+        console.log(response);
         resolve(JSON.parse(result));
       });
     }));
