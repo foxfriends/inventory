@@ -32,14 +32,17 @@ class EtsyOAuth2 {
   }
 
   async getToken(code, challenge) {
-    const query = qs.stringify({
+    const body = formurlencoded({
       grant_type: 'authorization_code',
       client_id: this.#clientId,
       redirect_uri: this.#redirectUri,
       code,
       code_verifier: challenge,
     });
-    return bent('POST', 'json', API_URL)(`/public/oauth/token?${query}`);
+    const headers = new Headers();
+    return bent('POST', 'json', API_URL)(`/public/oauth/token?${query}`, body,  {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    });
   }
 
   setCredentials({ access_token }) {
