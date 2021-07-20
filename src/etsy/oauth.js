@@ -1,4 +1,5 @@
 const { OAuth } = require('oauth');
+const { default: formurlencoded } = require('form-urlencoded');
 const qs = require('qs');
 const Queue = require('../util/ratelimit');
 
@@ -63,7 +64,7 @@ class EtsyOAuth {
 
   async put(endpoint, body) {
     return this.#queue.schedule(() => new Promise((resolve, reject) => {
-      this.#oauth.put(url(endpoint), this.#token, this.#secret, body, 'application/x-www-form-urlencoded', (error, result, response) => {
+      this.#oauth.put(url(endpoint), this.#token, this.#secret, formurlencoded(body), 'application/x-www-form-urlencoded', (error, result, response) => {
         console.log(response);
         if (error) { return reject(error); }
         resolve(JSON.parse(result));
