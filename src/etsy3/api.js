@@ -7,7 +7,7 @@ const { text } = require('../util/template');
 const log = require('../util/log');
 const EtsyOauth2 = require('./oauth');
 
-const SCOPES = ['listings_r', 'listings_w'];
+const SCOPES = ['listings_r', 'listings_w', 'transactions_r'];
 const TOKEN_PATH = joinPath(__dirname, 'token.json');
 const CREDENTIALS_PATH = joinPath(__dirname, 'credentials.json');
 

@@ -100,6 +100,11 @@ const router = new Router()
         ${service('etsy')}
       </section>
 
+      <section class='etsy3'>
+        <h1>Etsy (V2)</h1>
+        ${service('etsy3')}
+      </section>
+
       <section class='google'>
         <h1>Google</h1>
         ${googleSection}
