@@ -39,7 +39,7 @@ class EtsyOAuth2 {
       code,
       code_verifier: challenge,
     });
-    return bent('POST', 'json', API_URL)(`/public/oauth/token?${query}`, body,  {
+    return bent('POST', 'json', API_URL)(`/public/oauth/token`, body,  {
       'Content-Type': 'application/x-www-form-urlencoded',
     });
   }
