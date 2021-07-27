@@ -41,7 +41,11 @@ class Etsy3 {
 
   async generateAuthUrl() {
     const state = crypto.randomBytes(20).toString('hex');
-    const challenge = crypto.randomBytes(32).toString('base64');
+    const challenge = crypto
+      .randomBytes(32)
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
     const url = this.#client.generateAuthUrl(state, challenge, SCOPES);
     return { state, challenge, url }
   }
