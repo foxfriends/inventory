@@ -42,7 +42,7 @@ class EtsyOAuth2 {
         .digest('base64')
         .replace(/\+/g, '-')
         .replace(/\//g, '_')
-        .replace(/=+$/, '');
+        .replace(/=+$/, ''),
       code_challenge_method: 'S256',
     });
     return `https://www.etsy.com/oauth/connect?${query}`;
