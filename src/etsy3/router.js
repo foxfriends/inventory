@@ -15,6 +15,11 @@ module.exports = new Router()
     const { state: secret, challenge } = JSON.parse(ctx.cookies.get('etsy3_oauth_secret'));
     const { code, state } = ctx.query;
     if (secret !== state) { ctx.throw(401); }
-    await ctx.etsy3.auth(code, challenge);
-    ctx.redirect('/');
+    try {
+      await ctx.etsy3.auth(code, challenge);
+      ctx.redirect('/');
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   });
