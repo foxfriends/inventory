@@ -45,7 +45,8 @@ class Etsy3 {
       .randomBytes(32)
       .toString('base64')
       .replace(/\+/g, '-')
-      .replace(/\//g, '_');
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
     const url = this.#client.generateAuthUrl(state, challenge, SCOPES);
     return { state, challenge, url }
   }
