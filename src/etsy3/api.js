@@ -21,6 +21,12 @@ class Etsy3 {
     this.#shop = credentials.shop;
     this.#client = client;
     this.#setCredentials(token);
+    this.#client.on('authenticate', (authtoken) => {
+      fs
+        .writeFile(TOKEN_PATH, JSON.stringify(authtoken))
+        .catch(log.error('Failed to save token'))
+      this.#setCredentials(authtoken);
+    });
   }
 
   #ready = false;
@@ -41,10 +47,7 @@ class Etsy3 {
   }
 
   async auth(code, challenge) {
-    const authtoken = await this.#client.getToken(code, challenge);
-    fs.writeFile(TOKEN_PATH, JSON.stringify(authtoken))
-      .catch(log.error('Failed to save token'));
-    this.#setCredentials(authtoken);
+    await this.#client.getToken(code, challenge);
   }
 }
 

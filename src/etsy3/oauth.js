@@ -9,13 +9,24 @@ class EtsyOAuth2 {
   #clientId;
   #clientSecret;
   #redirectUri;
+  #credentials;
   #post;
   #get;
+  #eventHandlers = {};
 
   constructor(clientId, clientSecret, redirectUri) {
     this.#clientId = clientId;
     this.#clientSecret = clientSecret;
     this.#redirectUri = redirectUri;
+  }
+
+  on(event, handler) {
+    this.#eventHandlers[event] = this.#eventHandlers[event] ?? [];
+    this.#eventHandlers[event].push(handler);
+  }
+
+  #emit(event, data) {
+    this.#eventHandlers[event]?.forEach((f) => f(data));
   }
 
   generateAuthUrl(state, challenge, scopes) {
@@ -44,12 +55,34 @@ class EtsyOAuth2 {
       code,
       code_verifier: challenge,
     });
-    return bent('POST', 'json', API_URL)('/public/oauth/token', body, {
+    const requestedAt = Date.now();
+    const response = await bent('POST', 'json', API_URL)('/public/oauth/token', body, {
       'Content-Type': 'application/x-www-form-urlencoded',
     });
+    response.requested_at = requestedAt;
+    this.#emit('authenticate', response);
   }
 
-  setCredentials({ access_token }) {
+  async refreshToken() {
+    if (!this.#credentials) { return; }
+    const { refresh_token, requested_at, expires_in } = this.#credentials;
+    if (requested_at + expires_in * 1000 < Date.now() - 60000) { return; }
+    const body = formurlencoded({
+      grant_type: 'refresh_token',
+      client_id: this.#clientId,
+      refresh_token,
+    });
+    const requestedAt = Date.now();
+    const response = await bent('POST', 'json', API_URL)('/public/oauth/token', body, {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    });
+    response.requested_at = requestedAt;
+    this.#emit('authenticate', response);
+  }
+
+  setCredentials(credentials) {
+    this.#credentials = credentials;
+    const { access_token } = credentials;
     this.#post = bent('POST', 'json', API_URL, {
       'X-Api-Key': access_token,
       'Authorization': `Bearer ${access_token}`,
