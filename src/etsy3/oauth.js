@@ -2,6 +2,8 @@ const crypto = require('crypto');
 const { default: formurlencoded } = require('form-urlencoded');
 const qs = require('qs');
 const bent = require('bent');
+const Queue = require('../util/ratelimit');
+const base64url = require('../util/base64url');
 
 const API_URL = 'https://api.etsy.com/v3';
 
@@ -13,6 +15,7 @@ class EtsyOAuth2 {
   #post;
   #get;
   #eventHandlers = {};
+  #queue = new Queue(120); // Etsy has a rate limit of 15 requests per second, we give them a bit of a head start
 
   constructor(clientId, clientSecret, redirectUri) {
     this.#clientId = clientId;
@@ -36,13 +39,7 @@ class EtsyOAuth2 {
       redirect_uri: this.#redirectUri,
       scope: scopes.join(' '),
       state,
-      code_challenge: crypto
-        .createHash('sha256')
-        .update(challenge)
-        .digest('base64')
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/, ''),
+      code_challenge: base64url(crypto.createHash('sha256').update(challenge).digest('base64')),
       code_challenge_method: 'S256',
     });
     return `https://www.etsy.com/oauth/connect?${query}`;
@@ -86,22 +83,36 @@ class EtsyOAuth2 {
     this.#credentials = credentials;
     const { access_token } = credentials;
     this.#post = bent('POST', 'json', API_URL, {
-      'X-Api-Key': access_token,
+      'X-Api-Key': this.#clientId,
       'Authorization': `Bearer ${access_token}`,
     });
     this.#get = bent('GET', 'json', API_URL, {
-      'X-Api-Key': access_token,
+      'X-Api-Key': this.#clientId,
       'Authorization': `Bearer ${access_token}`,
     });
   }
 
   async get(endpoint, params) {
     const query = qs.stringify(params, { addQueryPrefix: true });
-    return this.#get(`${endpoint}${query}`);
+    return this.#queue.schedule(() => this.#get(`${endpoint}${query}`));
   }
 
   async post(endpoint, body) {
-    return this.#post(endpoint, body);
+    return this.#queue.schedule(() => this.#post(endpoint, body));
+  }
+
+  async getAll(endpoint, args = {}) {
+    const STEP = 100;
+    let results = [];
+    let count = null;
+    let offset = 0;
+    while (offset !== count) {
+      const response = await this.get(endpoint, { ...args, offset, limit: STEP });
+      count = response.count;
+      results.push(...response.results);
+      offset = results.length;
+    }
+    return results;
   }
 }
 

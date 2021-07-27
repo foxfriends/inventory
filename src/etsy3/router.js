@@ -15,11 +15,54 @@ module.exports = new Router()
     const { state: secret, challenge } = JSON.parse(ctx.cookies.get('etsy3_oauth_secret'));
     const { code, state } = ctx.query;
     if (secret !== state) { ctx.throw(401); }
-    try {
-      await ctx.etsy3.auth(code, challenge);
-      ctx.redirect('/');
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
+    await ctx.etsy3.auth(code, challenge);
+    ctx.redirect('/');
+  })
+  .get('/view', async (ctx) => {
+    ctx.body  = await ctx.etsy3.getInventory();
+    ctx.status = 200;
+  })
+  .post('/pull', async (ctx) => {
+    const inventory = await ctx.etsy3.getInventory();
+    await ctx.google.pushInventory('Etsy V2', inventory);
+    ctx.status = 200;
+    ctx.body = 'Ok';
+  })
+//  .post('/sync', async (ctx) => {
+//    const inventory = await ctx.etsy3.getInventory();
+//    await ctx.google.setInventory(inventory);
+//    ctx.status = 200;
+//    ctx.body = 'Ok';
+//  })
+//  .post('/push', async (ctx) => {
+//    const inventory = await ctx.google.getInventory();
+//    await ctx.etsy3.setInventory(inventory);
+//    ctx.status = 200;
+//    ctx.body = 'Ok';
+//  })
+//  .post('/hook/init', async (ctx) => {
+//    await ctx.etsy3.startWatchingOrders();
+//    ctx.status = 200;
+//    ctx.body = 'Ok';
+//  })
+//  .post('/hook/remove', async (ctx) => {
+//    await ctx.etsy3.stopWatchingOrders();
+//    ctx.status = 200;
+//    ctx.body = 'Ok';
+//  })
+//  .post('/orders', async (ctx) => {
+//    const orders = await ctx.etsy3.checkOrders();
+//    await ctx.google.acceptOrders('Etsy', 'Created', orders);
+//    ctx.status = 200;
+//    ctx.body = 'Ok';
+//  })
+  .get('/addresses', async (ctx) => {
+    const addresses = await ctx.etsy3.getAddresses();
+    const pdf = printAddresses(addresses, {
+      returnAddress: ctx.settings.returnaddress,
+      logo: ctx.settings.logo,
+    });
+    ctx.status = 200;
+    ctx.type = 'application/pdf';
+    ctx.body = pdf;
   });
