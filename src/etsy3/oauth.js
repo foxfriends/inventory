@@ -73,8 +73,10 @@ class EtsyOAuth2 {
   }
 
   async #refreshToken() {
+    console.log(this.#credentials);
     if (!this.#credentials) { return; }
     const { refresh_token, requested_at, expires_in } = this.#credentials;
+    console.log(requested_at + expires_in * 1000 < Date.now() - 60000);
     if (requested_at + expires_in * 1000 < Date.now() - 60000) { return; }
     const body = formurlencoded({
       grant_type: 'refresh_token',
@@ -90,6 +92,7 @@ class EtsyOAuth2 {
   }
 
   setCredentials(credentials) {
+    console.log('setting');
     this.#credentials = credentials;
     const { access_token } = credentials;
     this.#poster = bent('POST', 'json', API_URL, {
