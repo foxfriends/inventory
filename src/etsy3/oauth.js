@@ -12,8 +12,8 @@ class EtsyOAuth2 {
   #clientSecret;
   #redirectUri;
   #credentials;
-  #post;
-  #get;
+  #poster;
+  #getter;
   #eventHandlers = {};
   #queue = new Queue(120); // Etsy has a rate limit of 15 requests per second, we give them a bit of a head start
 
@@ -30,6 +30,16 @@ class EtsyOAuth2 {
 
   #emit(event, data) {
     this.#eventHandlers[event]?.forEach((f) => f(data));
+  }
+
+  #get(...args) {
+    await refreshToken();
+    return this.#getter(...args);
+  }
+
+  #post(...args) {
+    await refreshToken();
+    return this.#poster(...args);
   }
 
   generateAuthUrl(state, challenge, scopes) {
