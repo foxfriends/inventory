@@ -92,11 +92,11 @@ class EtsyOAuth2 {
   setCredentials(credentials) {
     this.#credentials = credentials;
     const { access_token } = credentials;
-    this.#post = bent('POST', 'json', API_URL, {
+    this.#poster = bent('POST', 'json', API_URL, {
       'X-Api-Key': this.#clientId,
       'Authorization': `Bearer ${access_token}`,
     });
-    this.#get = bent('GET', 'json', API_URL, {
+    this.#getter = bent('GET', 'json', API_URL, {
       'X-Api-Key': this.#clientId,
       'Authorization': `Bearer ${access_token}`,
     });
