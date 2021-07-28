@@ -33,12 +33,12 @@ class EtsyOAuth2 {
   }
 
   async #get(...args) {
-    await refreshToken();
+    await this.#refreshToken();
     return this.#getter(...args);
   }
 
   async #post(...args) {
-    await refreshToken();
+    await this.#refreshToken();
     return this.#poster(...args);
   }
 
@@ -72,7 +72,7 @@ class EtsyOAuth2 {
     this.#emit('authenticate', response);
   }
 
-  async refreshToken() {
+  async #refreshToken() {
     if (!this.#credentials) { return; }
     const { refresh_token, requested_at, expires_in } = this.#credentials;
     if (requested_at + expires_in * 1000 < Date.now() - 60000) { return; }
