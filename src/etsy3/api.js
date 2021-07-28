@@ -41,11 +41,11 @@ class Etsy3 {
     this.#shop = credentials.shop;
     this.#client = client;
     this.#setCredentials(token);
-    this.#client.on('authenticate', (authtoken) => {
+    this.#client.on('authenticate', (credentials) => {
       fs
-        .writeFile(TOKEN_PATH, JSON.stringify(authtoken))
+        .writeFile(TOKEN_PATH, JSON.stringify(credentials))
         .catch(log.error('Failed to save token'))
-      this.#setCredentials(authtoken);
+      this.#setCredentials(credentials);
     });
   }
 

@@ -63,7 +63,6 @@ class EtsyOAuth2 {
       code,
       code_verifier: challenge,
     });
-    console.log(body);
     const requestedAt = Date.now();
     const response = await bent('POST', 'json', API_URL)('/public/oauth/token', body, {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -73,11 +72,9 @@ class EtsyOAuth2 {
   }
 
   async #refreshToken() {
-    console.log(this.#credentials);
     if (!this.#credentials) { return; }
     const { refresh_token, requested_at, expires_in } = this.#credentials;
-    console.log(requested_at + expires_in * 1000 < Date.now() - 60000);
-    if (requested_at + expires_in * 1000 < Date.now() - 60000) { return; }
+    if (requested_at + expires_in < Date.now() - 60) { return; }
     const body = formurlencoded({
       grant_type: 'refresh_token',
       client_id: this.#clientId,
