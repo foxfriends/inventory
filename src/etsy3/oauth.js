@@ -32,12 +32,12 @@ class EtsyOAuth2 {
     this.#eventHandlers[event]?.forEach((f) => f(data));
   }
 
-  #get(...args) {
+  async #get(...args) {
     await refreshToken();
     return this.#getter(...args);
   }
 
-  #post(...args) {
+  async #post(...args) {
     await refreshToken();
     return this.#poster(...args);
   }
