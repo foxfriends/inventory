@@ -14,6 +14,7 @@ class EtsyOAuth2 {
   #credentials;
   #poster;
   #getter;
+  #putter;
   #eventHandlers = {};
   #queue = new Queue(120); // Etsy has a rate limit of 15 requests per second, we give them a bit of a head start
 
@@ -40,6 +41,11 @@ class EtsyOAuth2 {
   async #post(...args) {
     await this.#refreshToken();
     return this.#poster(...args);
+  }
+
+  async #put(...args) {
+    await this.#refreshToken();
+    return this.#putter(...args);
   }
 
   generateAuthUrl(state, challenge, scopes) {
@@ -74,7 +80,7 @@ class EtsyOAuth2 {
   async #refreshToken() {
     if (!this.#credentials) { return; }
     const { refresh_token, requested_at, expires_in } = this.#credentials;
-    if (requested_at + expires_in < Date.now() - 60) { return; }
+    if (requested_at + expires_in * 1000 > Date.now() - 60000) { return; }
     const body = formurlencoded({
       grant_type: 'refresh_token',
       client_id: this.#clientId,
@@ -99,6 +105,10 @@ class EtsyOAuth2 {
       'X-Api-Key': this.#clientId,
       'Authorization': `Bearer ${access_token}`,
     });
+    this.#putter = bent('PUT', 'json', API_URL, {
+      'X-Api-Key': this.#clientId,
+      'Authorization': `Bearer ${access_token}`,
+    });
   }
 
   async get(endpoint, params) {
@@ -108,6 +118,10 @@ class EtsyOAuth2 {
 
   async post(endpoint, body) {
     return this.#queue.schedule(() => this.#post(endpoint, body));
+  }
+
+  async put(endpoint, body) {
+    return this.#queue.schedule(() => this.#put(endpoint, body));
   }
 
   async getAll(endpoint, args = {}) {

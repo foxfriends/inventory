@@ -1,4 +1,5 @@
 const Router = require('@koa/router');
+const { printAddresses } = require('../util/pdf');
 
 const ONE_HOUR = 60 * 60 * 1000;
 
@@ -28,18 +29,18 @@ module.exports = new Router()
     ctx.status = 200;
     ctx.body = 'Ok';
   })
-//  .post('/sync', async (ctx) => {
-//    const inventory = await ctx.etsy3.getInventory();
-//    await ctx.google.setInventory(inventory);
-//    ctx.status = 200;
-//    ctx.body = 'Ok';
-//  })
-//  .post('/push', async (ctx) => {
-//    const inventory = await ctx.google.getInventory();
-//    await ctx.etsy3.setInventory(inventory);
-//    ctx.status = 200;
-//    ctx.body = 'Ok';
-//  })
+  .post('/sync', async (ctx) => {
+    const inventory = await ctx.etsy3.getInventory();
+    await ctx.google.setInventory(inventory);
+    ctx.status = 200;
+    ctx.body = 'Ok';
+  })
+  .post('/push', async (ctx) => {
+    const inventory = await ctx.google.getInventory();
+    await ctx.etsy3.setInventory(inventory);
+    ctx.status = 200;
+    ctx.body = 'Ok';
+  })
 //  .post('/hook/init', async (ctx) => {
 //    await ctx.etsy3.startWatchingOrders();
 //    ctx.status = 200;
@@ -50,12 +51,12 @@ module.exports = new Router()
 //    ctx.status = 200;
 //    ctx.body = 'Ok';
 //  })
-//  .post('/orders', async (ctx) => {
-//    const orders = await ctx.etsy3.checkOrders();
-//    await ctx.google.acceptOrders('Etsy', 'Created', orders);
-//    ctx.status = 200;
-//    ctx.body = 'Ok';
-//  })
+  .post('/orders', async (ctx) => {
+    const orders = await ctx.etsy3.checkOrders();
+    await ctx.google.acceptOrders('Etsy', 'Created', orders);
+    ctx.status = 200;
+    ctx.body = 'Ok';
+  })
   .get('/addresses', async (ctx) => {
     const addresses = await ctx.etsy3.getAddresses();
     const pdf = printAddresses(addresses, {

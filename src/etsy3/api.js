@@ -1,22 +1,36 @@
 const crypto = require('crypto');
 const { join: joinPath } = require('path');
 const { promises: fs } = require('fs');
+const { DateTime } = require('luxon');
 const {
+  __,
   always,
   apply,
   applySpec,
+  assocPath,
+  chain,
+  complement,
+  compose,
   concat,
   construct,
   converge,
+  equals,
   evolve,
+  find,
+  identity,
   join,
   map,
+  nth,
   o,
+  omit,
   path,
+  pick,
   pipe,
   pluck,
   prop,
+  propEq,
   split,
+  when,
   whereEq,
 } = require('ramda');
 const { decode } = require('html-entities');
@@ -102,7 +116,7 @@ class Etsy3 {
     return Promise
       .all(listings
         .map(and((listing) => this.#getListing(listing)
-          .then(path(['results', 'products']))
+          .then(prop('products'))
           .then(map(applySpec({
             name: pipe(
               prop('property_values'),
@@ -113,6 +127,41 @@ class Etsy3 {
             quantity: path(['offerings', 0, 'quantity']),
           }))))))
       .then(chain(([listing, products]) => products.map(evolve({ name: concat(listing.title) }))));
+  }
+
+  async setInventory(inventory) {
+    try {
+      const listings = await this.#getListings();
+      await Promise
+        .all(listings
+          .map((listing) => this.#getListing(listing)
+            .then(and(evolve({
+              products: map(converge((inv, prod) => inv && prod.sku ? assocPath(['offerings', 0, 'quantity'], inv.quantity, prod) : prod, [
+                compose(find(__, inventory), propEq('sku'), prop('sku')),
+                identity,
+              ])),
+            })))
+            .then(when(apply(complement(equals)), pipe(
+              nth(1),
+              evolve({
+                products:  map(pipe(
+                  pick(['sku', 'offerings', 'property_values']),
+                  evolve({
+                    property_values: map(pick(['property_id', 'value_ids', 'scale_id', 'property_name', 'values'])),
+                    offerings: map(pipe(
+                      pick(['price', 'quantity', 'is_enabled']),
+                      evolve({ price: ({ amount, divisor }) => amount / divisor }),
+                    )),
+                  }),
+                )),
+              }),
+              omit(['listing']),
+              (updated) => this.#client.put(`/application/listings/${listing.listing_id}/inventory`, updated),
+            )))));
+    } catch (error) {
+      console.error(await error.text());
+      throw error;
+    }
   }
 
   async getAddresses() {
@@ -128,9 +177,10 @@ class Etsy3 {
     if (lastCheck) {
       await this.settings({ watchOrders: DateTime.local().toISO() });
     }
+
     return this.#client
       .getAll(`/application/shops/${this.#shop}/receipts`, {
-        min_created: ((lastCheck && DateTime.fromISO(lastCheck)) ?? DateTime.local().minus({ days: 1 })).toSeconds(),
+        min_created: Math.floor(((lastCheck && DateTime.fromISO(lastCheck)) ?? DateTime.local().minus({ days: 1 })).toSeconds()),
       })
       .then(map(async (receipt) => {
         const { results } = await this.#client.get(`/application/shops/${this.#shop}/receipts/${receipt.receipt_id}/transactions`);
