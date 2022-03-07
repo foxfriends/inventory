@@ -197,6 +197,7 @@ class Google {
     await Promise.all([
       require('../etsy/api').then(when(prop('ready'), λ.setInventory(inventory))),
       require('../shopify/api').then(when(prop('ready'), λ.setInventory(inventory))),
+      require('../conartist/api').then(when(prop('ready'), λ.setInventory(inventory))),
     ]);
   }
 

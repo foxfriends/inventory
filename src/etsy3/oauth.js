@@ -89,7 +89,6 @@ class EtsyOAuth2 {
   }
 
   setCredentials(credentials) {
-    console.log('setting');
     this.#credentials = credentials;
     const { access_token } = credentials;
     this.#poster = bent('POST', 'json', API_URL, {

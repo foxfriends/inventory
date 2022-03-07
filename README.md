@@ -1,6 +1,6 @@
 # Inventory
 
-Simple inventory synchronizing app for Etsy and Shopify, using a Google Sheet as the data source.
+Simple inventory synchronizing app for Etsy, Shopify, and ConArtist, using a Google Sheet as the data source.
 
 This app is only capable of serving a single user. Multi-user support could be added in future if
 there is enough demand.
@@ -43,6 +43,16 @@ Create the following files:
         "redirect_uri": "<base_url>/shopify/oauth",
         "orders_created_url": "<base_url>/shopify/hook/orders/create",
         "orders_cancelled_url": "<base_url>/shopify/hook/orders/cancelled"
+    }
+    ```
+*   `src/conartist/credentials.json`: Sign up for ConArtist, and then fill in your credentials here.
+
+    ```json
+    {
+        "username": "<email>",
+        "password": "<password>",
+        "orders_created_url": "<base_url>/conartist/hook/orders/create",
+        "orders_cancelled_url": "<base_url>/conartist/hook/orders/cancelled"
     }
     ```
 

@@ -128,7 +128,6 @@ class Shopify {
       const page = await this.#client
         .graphql(ORDER_ADDRESSES, { after })
         .then(path(['data', 'orders']));
-      console.log(page.edges.map(prop('node')));
       addresses.push(...page.edges.map(path(['node', 'shippingAddress', 'formatted'])))
       if (!page.pageInfo.hasNextPage) { break; }
       after = last(page.edges)?.cursor;

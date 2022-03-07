@@ -139,6 +139,14 @@ const template = (formatter) => async (ctx) => {
             pull: () => post('/etsy3/pull'),
             push: () => post('/etsy3/push'),
           };
+
+          var conartist = {
+            sync: () => post('/conartist/sync'),
+            pull: () => post('/conartist/pull'),
+            push: () => post('/conartist/push'),
+            hookInit: () => post('/conartist/hook/init'),
+            hookRemove: () => post('/conartist/hook/remove'),
+          };
         </script>
       </body>
     </html>

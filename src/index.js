@@ -13,6 +13,7 @@ const google = require('./google');
 const etsy = require('./etsy');
 const etsy3 = require('./etsy3');
 const shopify = require('./shopify');
+const conartist = require('./conartist');
 
 const { html, template } = require('./util/template');
 const { λ } = require('./util/keypath');
@@ -73,6 +74,7 @@ const router = new Router()
   .use('/etsy', etsy.routes(), etsy.allowedMethods())
   .use('/etsy3', etsy3.routes(), etsy3.allowedMethods())
   .use('/shopify', shopify.routes(), shopify.allowedMethods())
+  .use('/conartist', conartist.routes(), conartist.allowedMethods())
   .post('/settings', async (ctx) => {
     const { name, pass, returnaddress } = ctx.request.body;
     let logo = ctx.settings.logo;
@@ -103,6 +105,11 @@ const router = new Router()
       <section class='etsy3'>
         <h1>Etsy (V2)</h1>
         ${service('etsy3')}
+      </section>
+
+      <section class='conartist'>
+        <h1>ConArtist</h1>
+        ${service('conartist')}
       </section>
 
       <section class='google'>
@@ -170,6 +177,7 @@ app
   .use(etsy())
   .use(etsy3())
   .use(shopify())
+  .use(conartist())
   .use(router.routes())
   .use(router.allowedMethods())
 
