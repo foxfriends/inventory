@@ -138,7 +138,7 @@ const router = new Router()
           <label>
             <div>Logo</div>
             <input type='file' name='logo' id='logo-input' />
-            <img src='${setting("logo")}' id='logo-preview' />
+            <img src='${setting("logo")}' id='logo-preview' style="max-width: 100%" />
             <script>
               const input = document.querySelector('#logo-input');
               const preview = document.querySelector('#logo-preview');
