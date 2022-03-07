@@ -41,16 +41,16 @@ module.exports = new Router()
     ctx.status = 200;
     ctx.body = 'Ok';
   })
-//  .post('/hook/init', async (ctx) => {
-//    await ctx.etsy3.startWatchingOrders();
-//    ctx.status = 200;
-//    ctx.body = 'Ok';
-//  })
-//  .post('/hook/remove', async (ctx) => {
-//    await ctx.etsy3.stopWatchingOrders();
-//    ctx.status = 200;
-//    ctx.body = 'Ok';
-//  })
+ .post('/hook/init', async (ctx) => {
+   await ctx.etsy3.startWatchingOrders();
+   ctx.status = 200;
+   ctx.body = 'Ok';
+ })
+ .post('/hook/remove', async (ctx) => {
+   await ctx.etsy3.stopWatchingOrders();
+   ctx.status = 200;
+   ctx.body = 'Ok';
+ })
   .post('/orders', async (ctx) => {
     const orders = await ctx.etsy3.checkOrders();
     await ctx.google.acceptOrders('Etsy', 'Created', orders);

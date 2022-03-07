@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const { join: joinPath } = require('path');
 const { promises: fs } = require('fs');
+const { CronJob } = require('cron');
 const { DateTime } = require('luxon');
 const {
   __,
@@ -50,11 +51,13 @@ const constructClient = converge(construct(EtsyOauth2), [prop('keystring'), prop
 class Etsy3 {
   #shop;
   #client;
+  #ordersCron;
 
   constructor(client, token, credentials) {
     this.#shop = credentials.shop;
     this.#client = client;
     this.#setCredentials(token);
+    this.#resumeWatchingOrders();
     this.#client.on('authenticate', (credentials) => {
       fs
         .writeFile(TOKEN_PATH, JSON.stringify(credentials))
@@ -130,38 +133,33 @@ class Etsy3 {
   }
 
   async setInventory(inventory) {
-    try {
-      const listings = await this.#getListings();
-      await Promise
-        .all(listings
-          .map((listing) => this.#getListing(listing)
-            .then(and(evolve({
-              products: map(converge((inv, prod) => inv && prod.sku ? assocPath(['offerings', 0, 'quantity'], inv.quantity, prod) : prod, [
-                compose(find(__, inventory), propEq('sku'), prop('sku')),
-                identity,
-              ])),
-            })))
-            .then(when(apply(complement(equals)), pipe(
-              nth(1),
-              evolve({
-                products:  map(pipe(
-                  pick(['sku', 'offerings', 'property_values']),
-                  evolve({
-                    property_values: map(pick(['property_id', 'value_ids', 'scale_id', 'property_name', 'values'])),
-                    offerings: map(pipe(
-                      pick(['price', 'quantity', 'is_enabled']),
-                      evolve({ price: ({ amount, divisor }) => amount / divisor }),
-                    )),
-                  }),
-                )),
-              }),
-              omit(['listing']),
-              (updated) => this.#client.put(`/application/listings/${listing.listing_id}/inventory`, updated),
-            )))));
-    } catch (error) {
-      console.error(await error.text());
-      throw error;
-    }
+    const listings = await this.#getListings();
+    await Promise
+      .all(listings
+        .map((listing) => this.#getListing(listing)
+          .then(and(evolve({
+            products: map(converge((inv, prod) => inv && prod.sku ? assocPath(['offerings', 0, 'quantity'], inv.quantity, prod) : prod, [
+              compose(find(__, inventory), propEq('sku'), prop('sku')),
+              identity,
+            ])),
+          })))
+          .then(when(apply(complement(equals)), pipe(
+            nth(1),
+            evolve({
+              products:  map(pipe(
+                pick(['sku', 'offerings', 'property_values']),
+                evolve({
+                  property_values: map(pick(['property_id', 'value_ids', 'scale_id', 'property_name', 'values'])),
+                  offerings: map(pipe(
+                    pick(['price', 'quantity', 'is_enabled']),
+                    evolve({ price: ({ amount, divisor }) => amount / divisor }),
+                  )),
+                }),
+              )),
+            }),
+            omit(['listing']),
+            (updated) => this.#client.put(`/application/listings/${listing.listing_id}/inventory`, updated),
+          )))));
   }
 
   async getAddresses() {
@@ -203,6 +201,36 @@ class Etsy3 {
         ),
       }))))
       .then(all);
+  }
+
+  async #resumeWatchingOrders() {
+    if (await this.setting('watchOrders')) {
+      this.startWatchingOrders();
+    }
+  }
+
+  async startWatchingOrders() {
+    if (!await this.setting('watchOrders')) {
+      await this.settings({ watchOrders: DateTime.local().toISO() });
+    }
+    if (!this.#ordersCron) {
+      this.#ordersCron = new CronJob('0 0 * * * *', async () => {
+        const google = await require('../google/api');
+        const orders = await this.checkOrders();
+        if (orders.length) {
+          await google.acceptOrders('Etsy', 'Created', orders);
+        }
+      });
+      this.#ordersCron.start();
+    }
+  }
+
+  async stopWatchingOrders() {
+    await this.settings({ watchOrders: null });
+    if (this.#ordersCron) {
+      this.#ordersCron.stop();
+      this.#ordersCron = null;
+    }
   }
 }
 
