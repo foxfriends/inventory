@@ -37,9 +37,14 @@ module.exports = new Router()
   })
   .post('/push', async (ctx) => {
     const inventory = await ctx.google.getInventory();
-    await ctx.etsy3.setInventory(inventory);
+    const responses = await ctx.etsy3.setInventory(inventory);
+    const fails = responses.filter((response) => response);
     ctx.status = 200;
-    ctx.body = 'Ok';
+    if (fails.length) {
+      ctx.body = `${fails.length}/${inventory.length} product(s) may have failed to update:\n${fails.join('\n')}`;
+    } else {
+      ctx.body = 'Ok';
+    }
   })
  .post('/hook/init', async (ctx) => {
    await ctx.etsy3.startWatchingOrders();

@@ -25,6 +25,7 @@ const {
   o,
   omit,
   path,
+  pathEq,
   pick,
   pipe,
   pluck,
@@ -107,7 +108,7 @@ class Etsy3 {
   }
 
   async #getListings() {
-    return this.#client.getAll(`/application/shops/${this.#shop}/listings/active`);
+    return this.#client.getAll(`/application/shops/${this.#shop}/listings`);
   }
 
   async #getListing({ listing_id }) {
@@ -134,19 +135,77 @@ class Etsy3 {
 
   async setInventory(inventory) {
     const listings = await this.#getListings();
-    await Promise
+    return Promise
       .all(listings
         .map((listing) => this.#getListing(listing)
-          .then(and(evolve({
-            products: map(converge((inv, prod) => inv && prod.sku ? assocPath(['offerings', 0, 'quantity'], inv.quantity, prod) : prod, [
-              compose(find(__, inventory), propEq('sku'), prop('sku')),
-              identity,
-            ])),
-          })))
-          .then(when(apply(complement(equals)), pipe(
-            nth(1),
-            evolve({
-              products:  map(pipe(
+          .then(async (inventoryListing) => {
+            const newListing = evolve({
+              products: map((product) => {
+                if  (!product.sku) { return product; }
+                const record = inventory.find(propEq('sku', product.sku));
+                if (!record) { return product; }
+                return assocPath(['offerings', 0, 'quantity'], record.quantity, product)
+              })
+            }, inventoryListing);
+            // Don't need to edit if the inventory has not changed since before
+            if (equals(inventoryListing, newListing)) { return; }
+            // Otherwise, Etsy's API is a real pain and we have to massage this data into another shape
+            if (newListing.products.every(pathEq(['offerings', 0, 'quantity'], 0))) {
+              // TODO: if all quantities are zero, then we have to send a different call
+              let disabledListing = { ...listing };
+              disabledListing.state = "inactive";
+              disabledListing.is_taxable = !disabledListing.non_taxable;
+              disabledListing.type = disabledListing.listing_type;
+              disabledListing.price = disabledListing.price.amount / disabledListing.price.divisor;
+              disabledListing = pick([
+                'image_ids',
+                'quantity',
+                'price',
+                'title',
+                'description',
+                'materials',
+                'should_auto_renew',
+                'shipping_profile_id',
+                'shop_section_id',
+                'item_weight',
+                'item_length',
+                'item_width',
+                'item_height',
+                'item_weight_unit',
+                'item_dimensions_unit',
+                'is_taxable',
+                'taxonomy_id',
+                'tags',
+                'who_made',
+                'when_made',
+                'featured_rank',
+                'is_personalizable',
+                'personalization_is_required',
+                'personalization_char_count_max',
+                'personalization_instructions',
+                'state',
+                'is_supply',
+                'production_partner_ids', // I don't think they ever give us this field, so hopefully it wasn't set!
+                'type',
+              ], disabledListing);
+              disabledListing.item_weight_unit = disabledListing.item_weight_unit ?? 'g';
+              disabledListing.item_dimensions_unit = disabledListing.item_dimensions_unit ?? 'in';
+              disabledListing.personalization_char_count_max = disabledListing.personalization_char_count_max ?? 0;
+              try {
+                await this.#client.put(`/application/shops/${this.#shop}/listings/${listing.listing_id}`, disabledListing, 'application/x-www-form-urlencoded')
+              } catch (error) {
+                log.warn(`Etsy updateListing(<${listing.listing_id} "${listing.title}">)`, error);
+                return listing.title;
+              }
+            } else if (listing.products.every(pathEq(['offerings', 0, 'quantity'], 0))) {
+              // TODO: if the listing was previously inactive, and now there is inventory, we have to
+              // activate it.
+              //
+              // This feature is not yet implemented in case Pearl has disabled listings that she
+              // does not want reactivated right now, even though they have inventory.
+              return listing.title;
+            } else {
+              newListing.products = newListing.products.map(pipe(
                 pick(['sku', 'offerings', 'property_values']),
                 evolve({
                   property_values: map(pick(['property_id', 'value_ids', 'scale_id', 'property_name', 'values'])),
@@ -155,11 +214,15 @@ class Etsy3 {
                     evolve({ price: ({ amount, divisor }) => amount / divisor }),
                   )),
                 }),
-              )),
-            }),
-            omit(['listing']),
-            (updated) => this.#client.put(`/application/listings/${listing.listing_id}/inventory`, updated),
-          )))));
+              ));
+              try {
+                await this.#client.put(`/application/listings/${listing.listing_id}/inventory`, updated)
+              } catch (error) {
+                log.warn(`Etsy updateListingInventory(<${listing.listing_id} "${listing.title}">)`, error);
+                return listing.title;
+              }
+            }
+          })));
   }
 
   async getAddresses() {

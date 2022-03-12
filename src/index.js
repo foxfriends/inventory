@@ -1,5 +1,5 @@
 const Koa = require('koa');
-const error = require('koa-error');
+const koaerror = require('koa-error');
 const Router = require('@koa/router');
 const logger = require('koa-logger');
 const body = require('koa-body');
@@ -7,6 +7,7 @@ const { promises: fs } = require('fs');
 const { ifElse, path } = require('ramda');
 const { DateTime } = require('luxon');
 
+const error = require('./error');
 const auth = require('./auth');
 const settings = require('./settings');
 const google = require('./google');
@@ -163,7 +164,8 @@ const router = new Router()
   `));
 
 app
-  .use(error())
+  .use(koaerror())
+  .use(error)
   .use(logger())
   .use(settings())
   .use(auth())

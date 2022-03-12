@@ -120,8 +120,13 @@ class EtsyOAuth2 {
     return this.#queue.schedule(() => this.#post(endpoint, body));
   }
 
-  async put(endpoint, body) {
-    return this.#queue.schedule(() => this.#put(endpoint, body));
+  async put(endpoint, body, contentType = 'application/json') {
+    if (contentType === 'application/x-www-form-urlencoded') {
+      body = formurlencoded(body);
+    }
+    return this.#queue.schedule(() => this.#put(endpoint, body, {
+      'Content-Type': contentType,
+    }));
   }
 
   async getAll(endpoint, args = {}) {
