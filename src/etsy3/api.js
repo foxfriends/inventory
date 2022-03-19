@@ -197,7 +197,7 @@ class Etsy3 {
                 log.warn(`Etsy updateListing(<${listing.listing_id} "${listing.title}">)`, error);
                 return listing.title;
               }
-            } else if (!listing.products || listing.products.every(pathEq(['offerings', 0, 'quantity'], 0))) {
+            } else if (inventoryListing.products.every(pathEq(['offerings', 0, 'quantity'], 0))) {
               // TODO: if the listing was previously inactive, and now there is inventory, we have to
               // activate it.
               //
