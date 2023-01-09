@@ -63,8 +63,12 @@ module.exports = new Router()
     ctx.body = 'Ok';
   })
   .get('/addresses', async (ctx) => {
+    const { name: nameFilter } = ctx.query
     const addresses = await ctx.etsy3.getAddresses();
-    const pdf = printAddresses(addresses, {
+    const addressesToPrint = addresses
+      .filter((address) => !!address)
+      .filter(([name]) => !nameFilter || name.includes(nameFilter))
+    const pdf = printAddresses(addressesToPrint, {
       returnAddress: ctx.settings.returnaddress,
       logo: ctx.settings.logo,
     });

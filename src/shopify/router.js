@@ -78,8 +78,12 @@ module.exports = new Router()
       .catch(log.error('Failed to log cancelled order from Shopify'));
   })
   .get('/addresses', async (ctx) => {
+    const { name: nameFilter } = ctx.query
     const addresses = await ctx.shopify.getAddresses();
-    const pdf = printAddresses(addresses, {
+    const addressesToPrint = addresses
+      .filter((address) => !!address)
+      .filter(([name]) => !nameFilter || name.includes(nameFilter))
+    const pdf = printAddresses(addressesToPrint, {
       returnAddress: ctx.settings.returnaddress,
       logo: ctx.settings.logo,
     });
