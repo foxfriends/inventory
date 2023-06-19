@@ -227,7 +227,7 @@ class Etsy3 {
 
   async getAddresses() {
     return this.#client
-      .getAll(`/application/shops/${this.#shop}/receipts`, { was_paid: true, was_shipped: false })
+      .getAll(`/application/shops/${this.#shop}/receipts`, { was_paid: true, was_shipped: false, was_canceled: false })
       .then(pluck('formatted_address'))
       .then(map(decode))
       .then(map(split('\n')));
