@@ -2,6 +2,7 @@ const Router = require('@koa/router');
 const { DateTime } = require('luxon');
 const { map, match, nth, pick, pipe, prop, startsWith, when } = require('ramda');
 const { Record, String, Array, Number, Unknown, Dictionary } = require('runtypes');
+const log = require('../util/log');
 
 const Item = Record({
   sku: String,
@@ -17,7 +18,6 @@ const Order = Record({
 module.exports = new Router()
   .post('/orders/create', async (ctx) => {
     try {
-      console.log(ctx.request.body);
       const body = Order.check(ctx.request.body);
       ctx.status = 200;
       ctx.body = 'Ok';
