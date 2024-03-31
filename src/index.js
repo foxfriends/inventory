@@ -11,7 +11,6 @@ const error = require('./error');
 const auth = require('./auth');
 const settings = require('./settings');
 const google = require('./google');
-const etsy = require('./etsy');
 const etsy3 = require('./etsy3');
 const shopify = require('./shopify');
 const conartist = require('./conartist');
@@ -72,7 +71,6 @@ const googleSection = ifElse(path(['google', 'ready']), googleSettings, authoriz
 
 const router = new Router()
   .use('/google', google.routes(), google.allowedMethods())
-  .use('/etsy', etsy.routes(), etsy.allowedMethods())
   .use('/etsy3', etsy3.routes(), etsy3.allowedMethods())
   .use('/shopify', shopify.routes(), shopify.allowedMethods())
   .use('/conartist', conartist.routes(), conartist.allowedMethods())
@@ -96,11 +94,6 @@ const router = new Router()
       <section class='shopify'>
         <h1>Shopify</h1>
         ${service('shopify')}
-      </section>
-
-      <section class='etsy'>
-        <h1>Etsy</h1>
-        ${service('etsy')}
       </section>
 
       <section class='etsy3'>
@@ -176,7 +169,6 @@ app
     formLimit: 1024 * 1024,
   }))
   .use(google())
-  .use(etsy())
   .use(etsy3())
   .use(shopify())
   .use(conartist())
