@@ -1,6 +1,5 @@
 const Router = require('@koa/router');
 const { map, match, nth, pick, pipe, prop, startsWith, when } = require('ramda');
-const { html } = require('../util/template');
 
 const SHEET_URL_REGEX = /https:\/\/docs.google.com\/spreadsheets\/d\/(\w+)\/.*/i;
 

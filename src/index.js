@@ -14,6 +14,7 @@ const google = require('./google');
 const etsy3 = require('./etsy3');
 const shopify = require('./shopify');
 const conartist = require('./conartist');
+const manual = require('./manual');
 
 const { html, template } = require('./util/template');
 const { λ } = require('./util/keypath');
@@ -74,6 +75,7 @@ const router = new Router()
   .use('/etsy3', etsy3.routes(), etsy3.allowedMethods())
   .use('/shopify', shopify.routes(), shopify.allowedMethods())
   .use('/conartist', conartist.routes(), conartist.allowedMethods())
+  .use('/custom', manual.routes(), manual.allowedMethods())
   .post('/settings', async (ctx) => {
     const { name, pass, returnaddress } = ctx.request.body;
     let logo = ctx.settings.logo;
