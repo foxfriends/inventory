@@ -24,7 +24,6 @@ module.exports = new Router()
   })
   .get('/view', async (ctx) => {
     const rows = await ctx.google.getInventory();
-    console.log(rows);
     ctx.body = rows.filter((row) => !!row.sku);
     ctx.status = 200;
   });
