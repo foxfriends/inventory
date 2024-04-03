@@ -23,6 +23,8 @@ module.exports = new Router()
     ctx.redirect('back', '/');
   })
   .get('/view', async (ctx) => {
-    ctx.body = await ctx.google.getInventory();
+    const rows = await ctx.google.getInventory();
+    console.log(rows);
+    ctx.body = rows.filter((row) => !!row.sku);
     ctx.status = 200;
   });
