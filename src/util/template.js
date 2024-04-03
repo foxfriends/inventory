@@ -125,15 +125,6 @@ const template = (formatter) => async (ctx) => {
             hookRemove: () => post('/shopify/hook/remove'),
           };
 
-          var etsy = {
-            sync: () => post('/etsy/sync'),
-            pull: () => post('/etsy/pull'),
-            push: () => post('/etsy/push'),
-            hookInit: () => post('/etsy/hook/init'),
-            hookRemove: () => post('/etsy/hook/remove'),
-            orders: () => post('/etsy/orders'),
-          };
-
           var etsy3 = {
             sync: () => post('/etsy3/sync'),
             pull: () => post('/etsy3/pull'),

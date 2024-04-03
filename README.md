@@ -22,7 +22,7 @@ This app must be hosted on some public webserver. The URL of that server is refe
 Create the following files:
 
 *   `src/google/credentials.json`: Get this file from [Google Developer Console quickstart][Google Developer]. Configure the redirect URI to be `<base_url>/google/oauth`.
-*   `src/etsy/credentials.json`: Create an app in the [Etsy Developers][] portal and create this file with the following information:
+*   `src/etsy3/credentials.json`: Create an app in the [Etsy Developers][] portal and create this file with the following information:
 
     ```json
     {
