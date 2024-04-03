@@ -28,6 +28,7 @@ module.exports = new Router()
         }]])
         .catch(log.error('Failed to accept custom order'));
     } catch (error) {
-      ctx.throw(error.message, 400);
+      log.error('Invalid request', error);
+      ctx.throw(400, error.message);
     }
   });
