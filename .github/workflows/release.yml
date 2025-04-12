@@ -41,7 +41,7 @@ jobs:
           tags: ${{ steps.meta.output.tags }}
           labels: ${{ steps.meta.output.labels }}
       - name: Generate artifact attestation
-        uses: actions/attest-buidl-provenance@v2
+        uses: actions/attest-build-provenance@v2
         with:
           subject-name: ghcr.io
           subject-digest: ${{ steps.push.outputs.digest }}
