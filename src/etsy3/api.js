@@ -41,11 +41,9 @@ const { text } = require("../util/template");
 const log = require("../util/log");
 const base64url = require("../util/base64url");
 const EtsyOauth2 = require("./oauth");
+const { TOKEN_PATH, SETTINGS_PATH, CREDENTIALS_PATH } = require('./env');
 
 const SCOPES = ["listings_r", "listings_w", "transactions_r"];
-const TOKEN_PATH = joinPath(__dirname, "token.json");
-const CREDENTIALS_PATH = joinPath(__dirname, "credentials.json");
-const SETTINGS_PATH = joinPath(__dirname, "settings.json");
 
 const constructClient = converge(construct(EtsyOauth2), [
   prop("keystring"),

@@ -7,7 +7,7 @@ there is enough demand.
 
 ## Setup
 
-This is a basic [NodeJS][] (14) app. Install that, then you can run it as follows:
+This is a basic [NodeJS][] (22) app. Install that, then you can run it as follows:
 
 [NodeJS]: https://nodejs.org
 

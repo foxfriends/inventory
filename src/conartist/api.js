@@ -5,6 +5,7 @@ const { DateTime } = require('luxon');
 const { always, apply, applySpec, complement, construct, converge, last, map, pick, prop, propEq, path } = require('ramda');
 const { all, and } = require('../util/promise');
 const log = require('../util/log');
+const { CREDENTIALS_PATH } = require('./env');
 
 const GET_INVENTORY = require('./queries/getInventory');
 const UPDATE_INVENTORY = require('./queries/updateInventory');
@@ -14,8 +15,6 @@ const UNREGISTER_CREATE_RECORD_WEBHOOK = require('./queries/unregisterCreateReco
 const UNREGISTER_DELETE_RECORD_WEBHOOK = require('./queries/unregisterDeleteRecordWebhook');
 
 const ConArtistUserAuth = require('./userAuth');
-
-const CREDENTIALS_PATH = join(__dirname, 'credentials.json');
 
 const constructClient = converge(construct(ConArtistUserAuth), [prop('username'), prop('password')]);
 

@@ -7,6 +7,7 @@ const { always, apply, applySpec, complement, construct, converge, last, map, pi
 const { all, and } = require('../util/promise');
 const log = require('../util/log');
 const { HooksExistError } = require('./errors');
+const { TOKEN_PATH, CREDENTIALS_PATH } = require('./env');
 
 const ORDER_ADDRESSES = require('./queries/orderAddresses');
 const GET_INVENTORY = require('./queries/getInventory');
@@ -17,8 +18,6 @@ const UNREGISTER_WEBHOOK = require('./queries/unregisterWebhook');
 
 const ShopifyOAuth2 = require('./oauth');
 
-const CREDENTIALS_PATH = join(__dirname, 'credentials.json');
-const TOKEN_PATH = join(__dirname, 'token.json');
 const SCOPES = ['read_products', 'write_inventory', 'read_orders'];
 
 const constructClient = converge(construct(ShopifyOAuth2), [prop('shop'), prop('api_key'), prop('secret_key'), prop('redirect_uri')]);

@@ -2,7 +2,7 @@ const { always } = require('ramda');
 const { promises: fs } = require('fs');
 const path = require('path');
 
-const SETTINGS_PATH = path.join(__dirname, 'settings.json');
+const SETTINGS_PATH = path.join(process.env.CONFIG_DIR || __dirname, 'settings.json');
 
 module.exports = () => {
   return async (ctx, next) => {

@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "Automatically sync inventory for various ecommerce platforms",
   "main": "src/index.js",
+  "private": true,
+  "engines": {
+    "node": "22.14.0",
+    "npm": "10.9.2"
+  },
   "scripts": {
     "start": "node --max-http-header-size 32768 src/index.js",
     "dev": "nodemon src/index.js",
@@ -25,7 +30,7 @@
   "homepage": "https://github.com/foxfriends/inventory#readme",
   "dependencies": {
     "@flighter/a1-notation": "^1.0.7",
-    "@koa/router": "^10.0.0",
+    "@koa/router": "^13.1.0",
     "basic-auth": "^2.0.1",
     "bent": "^7.3.12",
     "cron": "^1.8.2",
@@ -47,7 +52,7 @@
     "tsscmp": "^1.0.6"
   },
   "devDependencies": {
-    "nodemon": "^2.0.20"
+    "nodemon": "^3.1.9"
   },
   "nodemonConfig": {
     "ignore": [

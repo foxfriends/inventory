@@ -7,11 +7,9 @@ const { add, always, apply, construct, converge, indexOf, juxt, map, path, prop,
 const { and } = require('../util/promise');
 const { λ } = require('../util/keypath');
 const log = require('../util/log');
+const { TOKEN_PATH, SETTINGS_PATH, CREDENTIALS_PATH } = require('./env');
 
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
-const SETTINGS_PATH = join(__dirname, 'settings.json');
-const TOKEN_PATH = join(__dirname, 'token.json');
-const CREDENTIALS_PATH = join(__dirname, 'credentials.json');
 const AUTH_OPTIONS = { access_type: 'offline', scope: SCOPES, prompt: 'consent' };
 
 const sheets = google.sheets('v4');
