@@ -29,7 +29,7 @@ resource "docker_container" "inventory" {
   }
 
   volumes {
-    container_path = "/config/"
+    container_path = "/config"
     host_path      = var.config_dir
   }
 
@@ -42,8 +42,8 @@ resource "docker_container" "inventory" {
   }
 
   env = [
-    "CONFIG_DIR=/config/",
-    "RES_DIR=/app/res/",
+    "CONFIG_DIR=/config",
+    "RES_DIR=/app/res",
     "PORT=3000",
   ]
 }
