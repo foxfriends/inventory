@@ -71,6 +71,10 @@ const googleSettings = html`
 const googleSection = ifElse(path(['google', 'ready']), googleSettings, authorize('google'));
 
 const router = new Router()
+  .get('/health', async (ctx) => {
+    ctx.status = 200;
+    ctx.body = 'Ok';
+  })
   .use('/google', google.routes(), google.allowedMethods())
   .use('/etsy3', etsy3.routes(), etsy3.allowedMethods())
   .use('/shopify', shopify.routes(), shopify.allowedMethods())

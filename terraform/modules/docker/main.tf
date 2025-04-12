@@ -33,6 +33,14 @@ resource "docker_container" "inventory" {
     host_path      = var.config_dir
   }
 
+  healthcheck {
+    test         = ["CMD", "curl", "-f", "localhost:3000/health"]
+    interval     = "0.5s"
+    retries      = 2
+    start_period = "1s"
+    timeout      = "0.5s"
+  }
+
   env = [
     "CONFIG_DIR=/config/",
     "RES_DIR=/app/res/",
