@@ -1,4 +1,11 @@
 /node_modules/
+
 *token.json
 *credentials.json
 *settings.json
+
+.terraform/
+*.tfstate
+*.tfstate.backup
+
+/config/
