@@ -21,8 +21,9 @@ resource "docker_image" "inventory" {
 }
 
 resource "docker_container" "inventory" {
-  image = docker_image.inventory.image_id
-  name  = var.name
+  image   = docker_image.inventory.image_id
+  name    = var.name
+  restart = var.restart
 
   ports {
     internal = 3000

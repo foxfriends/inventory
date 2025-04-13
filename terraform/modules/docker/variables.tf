@@ -15,3 +15,8 @@ variable "image_version" {
   type    = string
   default = "main"
 }
+
+variable "restart" {
+  type    = string
+  default = "unless-stopped"
+}
