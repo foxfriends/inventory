@@ -39,10 +39,10 @@ resource "docker_container" "inventory" {
 
   healthcheck {
     test         = ["CMD", "curl", "-f", "localhost:3000/health"]
-    interval     = "0.5s"
+    interval     = "500ms"
     retries      = 2
     start_period = "1s"
-    timeout      = "0.5s"
+    timeout      = "500ms"
   }
 
   env = [
