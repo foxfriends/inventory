@@ -32,7 +32,10 @@ resource "docker_container" "inventory" {
   volumes {
     container_path = "/config"
     host_path      = var.config_dir
+    read_only      = false
   }
+
+  network_mode = "bridge"
 
   healthcheck {
     test         = ["CMD", "curl", "-f", "localhost:3000/health"]
