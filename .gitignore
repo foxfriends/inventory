@@ -4,8 +4,6 @@
 *credentials.json
 *settings.json
 
-.terraform/
-*.tfstate
-*.tfstate.backup
+.env
 
 /config/
