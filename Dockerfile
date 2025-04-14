@@ -9,4 +9,4 @@ COPY ./res/ ./res/
 ENV PORT=3000
 EXPOSE $PORT
 
-ENTRYPOINT ["npm", "start"]
+CMD ["npm", "start"]
