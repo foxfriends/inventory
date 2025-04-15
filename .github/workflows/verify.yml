@@ -26,7 +26,7 @@ jobs:
           terraform_version: "1.11.4"
       - name: Terraform init
         run: terraform init -backend=false
-        working-directory: terraform
+        working-directory: terraform/modules/docker
       - name: Terraform validate
         run: terraform validate
         working-directory: terraform/modules/docker

@@ -1,0 +1,17 @@
+name: Deploy
+
+on:
+  registry_package:
+    types: [published, updated]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: cameldridge.com
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.DEPLOY_PAT }}
+          repository: foxfriends/cameldridge.com
+          event-type: deploy
