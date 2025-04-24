@@ -3,6 +3,11 @@ variable "name" {
   type = string
 }
 
+variable "expose" {
+  type    = bool
+  default = true
+}
+
 variable "port" {
   type     = number
   nullable = true
