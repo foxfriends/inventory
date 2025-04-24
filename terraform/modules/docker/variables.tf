@@ -1,11 +1,27 @@
+# Common variables
 variable "name" {
   type = string
 }
 
-variable "config_dir" {
-  type = string
+variable "port" {
+  type     = number
+  nullable = true
+  default  = null
 }
 
+variable "networks" {
+  type = list(object({
+    name = string
+  }))
+  default = []
+}
+
+variable "restart" {
+  type    = string
+  default = "unless-stopped"
+}
+
+# Default variables
 variable "image_name" {
   type    = string
   default = "ghcr.io/foxfriends/inventory"
@@ -16,7 +32,7 @@ variable "image_version" {
   default = "main"
 }
 
-variable "restart" {
-  type    = string
-  default = "unless-stopped"
+# Configuration variables
+variable "config_dir" {
+  type = string
 }

@@ -27,6 +27,7 @@ resource "docker_container" "inventory" {
 
   ports {
     internal = 3000
+    external = var.port
   }
 
   volumes {
@@ -36,6 +37,15 @@ resource "docker_container" "inventory" {
   }
 
   network_mode = "bridge"
+
+  dynamic "networks_advanced" {
+    for_each = var.networks
+    iterator = net
+
+    content {
+      name = net.value["name"]
+    }
+  }
 
   healthcheck {
     test         = ["CMD", "curl", "-f", "localhost:3000/health"]
