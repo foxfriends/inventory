@@ -34,7 +34,7 @@ resource "docker_container" "inventory" {
     for_each = var.expose ? [var.port] : []
 
     content {
-      internal = 3000
+      internal = local.internal_port
       external = ports.value
     }
   }
@@ -61,7 +61,7 @@ resource "docker_container" "inventory" {
   }
 
   healthcheck {
-    test         = ["CMD", "curl", "-f", "localhost:3000/health"]
+    test         = ["CMD", "curl", "-f", "localhost:${local.internal_port}/health"]
     interval     = "5s"
     retries      = 2
     start_period = "1s"
@@ -71,6 +71,6 @@ resource "docker_container" "inventory" {
   env = [
     "CONFIG_DIR=/config",
     "RES_DIR=/app/res",
-    "PORT=3000",
+    "PORT=${local.internal_port}",
   ]
 }
