@@ -30,6 +30,8 @@ resource "docker_container" "inventory" {
   name    = var.name
   restart = var.restart
 
+  memory = 256
+
   log_driver = var.log_driver
   log_opts   = var.log_opts
 
