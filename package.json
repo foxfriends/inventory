@@ -38,7 +38,7 @@
     "form-urlencoded": "^4.2.1",
     "googleapis": "^67.0.0",
     "html-entities": "^2.3.2",
-    "koa": "^3.0.1",
+    "koa": "^2.16.1",
     "koa-body": "^4.2.0",
     "koa-error": "^3.2.0",
     "koa-logger": "^3.2.1",
