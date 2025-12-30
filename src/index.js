@@ -17,7 +17,6 @@ const conartist = require('./conartist');
 const manual = require('./manual');
 
 const { html, template } = require('./util/template');
-const { λ } = require('./util/keypath');
 
 const app = new Koa();
 
@@ -58,11 +57,11 @@ const googleSettings = html`
   <form method='POST' action='/google/settings'>
     <label>
       <div>Inventory Spreadsheet ID (open your inventory sheet in Google Drive and paste the URL here)</div>
-      <input name='inventory' placeholder='https://docs.google.com/spreadsheets/d/&lt;...&gt;/edit' type='text' value='${λ.google.setting('inventory')}' />
+      <input name='inventory' placeholder='https://docs.google.com/spreadsheets/d/&lt;...&gt;/edit' type='text' value='${(c) => c.google.setting('inventory')}' />
     </label>
     <label>
       <div>Orders Spreadsheet ID (open your orders sheet in Google Drive and paste the URL here)</div>
-      <input name='orders' placeholder='https://docs.google.com/spreadsheets/d/&lt;...&gt;/edit' type='text' value='${λ.google.setting('orders')}' />
+      <input name='orders' placeholder='https://docs.google.com/spreadsheets/d/&lt;...&gt;/edit' type='text' value='${(c) => c.google.setting('orders')}' />
     </label>
     <input type='submit' value='Save' />
   </form>

@@ -5,7 +5,6 @@ const { DateTime } = require('luxon');
 const { google } = require('googleapis');
 const { add, always, apply, construct, converge, indexOf, juxt, map, path, prop, propEq, when, zipWith } = require('ramda');
 const { and } = require('../util/promise');
-const { λ } = require('../util/keypath');
 const log = require('../util/log');
 const { TOKEN_PATH, SETTINGS_PATH, CREDENTIALS_PATH } = require('./env');
 
@@ -193,9 +192,9 @@ class Google {
     }
     await this.setInventory(inventory, true);
     await Promise.allSettled([
-      require('../etsy3/api').then(when(prop('ready'), λ.setInventory(inventory))),
-      require('../shopify/api').then(when(prop('ready'), λ.setInventory(inventory))),
-      require('../conartist/api').then(when(prop('ready'), λ.setInventory(inventory))),
+      require('../etsy3/api').then(when(prop('ready'), (c) => c.setInventory(inventory))),
+      require('../shopify/api').then(when(prop('ready'), (c) => c.setInventory(inventory))),
+      require('../conartist/api').then(when(prop('ready'), (c) => c.setInventory(inventory))),
     ]);
   }
 
