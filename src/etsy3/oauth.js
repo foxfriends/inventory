@@ -98,15 +98,15 @@ class EtsyOAuth2 {
     this.#credentials = credentials;
     const { access_token } = credentials;
     this.#poster = bent('POST', 'json', API_URL, {
-      'X-Api-Key': this.#clientId,
+      'X-Api-Key': `${this.#clientId}:${this.#clientSecret}`,
       'Authorization': `Bearer ${access_token}`,
     });
     this.#getter = bent('GET', 'json', API_URL, {
-      'X-Api-Key': this.#clientId,
+      'X-Api-Key': `${this.#clientId}:${this.#clientSecret}`,
       'Authorization': `Bearer ${access_token}`,
     });
     this.#putter = bent('PUT', 'json', API_URL, {
-      'X-Api-Key': this.#clientId,
+      'X-Api-Key': `${this.#clientId}:${this.#clientSecret}`,
       'Authorization': `Bearer ${access_token}`,
     });
   }
