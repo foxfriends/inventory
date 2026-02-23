@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "private": true,
   "engines": {
-    "node": "22.14.0",
-    "npm": "10.9.2"
+    "node": "24.13.1",
+    "npm": "11.8.0"
   },
   "scripts": {
     "start": "node --max-http-header-size 32768 src/index.js",
