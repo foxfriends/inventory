@@ -13,7 +13,7 @@ const settings = require('./settings');
 const google = require('./google');
 const etsy3 = require('./etsy3');
 const shopify = require('./shopify');
-const conartist = require('./conartist');
+// const conartist = require('./conartist');
 const manual = require('./manual');
 
 const { html, template } = require('./util/template');
@@ -21,6 +21,7 @@ const { html, template } = require('./util/template');
 const app = new Koa();
 
 const actions = (service) => html`
+  <!--
   <button onclick='${service}.pull()'>
     Pull (new spreadsheet)
   </button>
@@ -39,6 +40,7 @@ const actions = (service) => html`
   <button onclick='${service}.orders()'>
     Check Orders
   </button>
+  -->
   <a href='/${service}/addresses' target='_blank'>
     Print Addresses
   </a>
@@ -77,7 +79,7 @@ const router = new Router()
   .use('/google', google.routes(), google.allowedMethods())
   .use('/etsy3', etsy3.routes(), etsy3.allowedMethods())
   .use('/shopify', shopify.routes(), shopify.allowedMethods())
-  .use('/conartist', conartist.routes(), conartist.allowedMethods())
+  // .use('/conartist', conartist.routes(), conartist.allowedMethods())
   .use('/custom', manual.routes(), manual.allowedMethods())
   .post('/settings', async (ctx) => {
     const { name, pass, returnaddress } = ctx.request.body;
@@ -106,10 +108,12 @@ const router = new Router()
         ${service('etsy3')}
       </section>
 
+      <!--
       <section class='conartist'>
         <h1>ConArtist</h1>
         ${service('conartist')}
       </section>
+      -->
 
       <section class='google'>
         <h1>Google</h1>
@@ -176,7 +180,7 @@ app
   .use(google())
   .use(etsy3())
   .use(shopify())
-  .use(conartist())
+  // .use(conartist())
   .use(router.routes())
   .use(router.allowedMethods())
 

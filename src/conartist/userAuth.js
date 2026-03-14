@@ -1,9 +1,8 @@
 const { default: formurlencoded } = require('form-urlencoded');
 const qs = require('qs');
-const bent = require('bent');
 const graphql = require('./queries/tag');
 
-const BASE_URL = "https://conartist.app";
+const BASE_URL = 'https://conartist.app';
 
 class ConArtistUserAuth {
   #username;
@@ -17,11 +16,14 @@ class ConArtistUserAuth {
   }
 
   async #getToken() {
-    const { status, data, error } = await bent('POST', 'json', BASE_URL)('/api/auth', {
-      usr: this.#username,
-      psw: this.#password,
+    const response = await fetch(`${BASE_URL}/api/auth`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usr: this.#username, psw: this.#password }),
     });
-    if (status !== "Success") {
+    if (!response.ok) throw new Error(await response.text());
+    const { status, data, error } = await response.json();
+    if (status !== 'Success') {
       throw error;
     }
     return data;
@@ -29,7 +31,15 @@ class ConArtistUserAuth {
 
   async reauthorize() {
     const token = await this.#getToken();
-    this.#post = bent('POST', 'json', BASE_URL, { 'Authorization': `Bearer ${token}` });
+    this.#post = async (path, body) => {
+      const response = await fetch(`${BASE_URL}${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) throw new Error(await response.text());
+      return response.json();
+    }
   }
 
   async graphql(query, variables) {

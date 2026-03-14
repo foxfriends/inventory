@@ -24,12 +24,12 @@ const constructClient = converge(construct(ShopifyOAuth2), [prop('shop'), prop('
 
 class Shopify {
   #client;
-  #orderCancelledCallback;
-  #orderCreatedCallback;
+  // #orderCancelledCallback;
+  // #orderCreatedCallback;
 
   constructor(client, token, credentials) {
-    this.#orderCancelledCallback = credentials.orders_cancelled_url;
-    this.#orderCreatedCallback = credentials.orders_created_url;
+    // this.#orderCancelledCallback = credentials.orders_cancelled_url;
+    // this.#orderCreatedCallback = credentials.orders_created_url;
     this.#client = client;
     this.#setCredentials(token);
   }
@@ -57,69 +57,69 @@ class Shopify {
     this.#setCredentials(token);
   }
 
-  async getInventory() {
-    const inventoryLevels = [];
+  // async getInventory() {
+  //   const inventoryLevels = [];
 
-    for (let after = null;;) {
-      // TODO: we only support one location for now.
-      const page = await this.#client
-        .graphql(GET_INVENTORY, { after })
-        .then(path(['data', 'locations', 'edges', 0, 'node', 'inventoryLevels']));
-      inventoryLevels.push(...page.edges);
-      if (!page.pageInfo.hasNextPage) { break; }
-      after = last(inventoryLevels).cursor;
-    }
+  //   for (let after = null;;) {
+  //     // TODO: we only support one location for now.
+  //     const page = await this.#client
+  //       .graphql(GET_INVENTORY, { after })
+  //       .then(path(['data', 'locations', 'edges', 0, 'node', 'inventoryLevels']));
+  //     inventoryLevels.push(...page.edges);
+  //     if (!page.pageInfo.hasNextPage) { break; }
+  //     after = last(inventoryLevels).cursor;
+  //   }
 
-    return inventoryLevels
-      .map(applySpec({
-        name: path(['node', 'item', 'variant', 'displayName']),
-        sku: path(['node', 'item', 'sku']),
-        quantity: path(['node', 'available']),
-      }));
-  }
+  //   return inventoryLevels
+  //     .map(applySpec({
+  //       name: path(['node', 'item', 'variant', 'displayName']),
+  //       sku: path(['node', 'item', 'sku']),
+  //       quantity: path(['node', 'available']),
+  //     }));
+  // }
 
-  async setInventory(inventory) {
-    for (let after = null;;) {
-      const location = await this.#client
-        .graphql(GET_INVENTORY, { after })
-        .then(path(['data', 'locations', 'edges', 0, 'node']));
+  // async setInventory(inventory) {
+  //   for (let after = null;;) {
+  //     const location = await this.#client
+  //       .graphql(GET_INVENTORY, { after })
+  //       .then(path(['data', 'locations', 'edges', 0, 'node']));
 
-      const adjustments = location
-        .inventoryLevels
-        .edges
-        .map(applySpec({
-          id: path(['node', 'item', 'id']),
-          sku: path(['node', 'item', 'sku']),
-          available: path(['node', 'available']),
-        }))
-        .filter(prop('sku'))
-        .map(({ id, sku, available }) => ({
-          inventoryItemId: id,
-          availableDelta: (inventory.find(propEq('sku', sku))?.quantity ?? available) - available,
-        }))
-        .filter(prop('availableDelta'));
+  //     const adjustments = location
+  //       .inventoryLevels
+  //       .edges
+  //       .map(applySpec({
+  //         id: path(['node', 'item', 'id']),
+  //         sku: path(['node', 'item', 'sku']),
+  //         available: path(['node', 'available']),
+  //       }))
+  //       .filter(prop('sku'))
+  //       .map(({ id, sku, available }) => ({
+  //         inventoryItemId: id,
+  //         availableDelta: (inventory.find(propEq('sku', sku))?.quantity ?? available) - available,
+  //       }))
+  //       .filter(prop('availableDelta'));
 
-      if (adjustments.length) {
-        const response = await this.#client.graphql(UPDATE_INVENTORY, { location: location.id, adjustments });
-        if (response.errors) {
-          log.error('shopify push')(JSON.stringify(response))
-        }
-      }
+  //     if (adjustments.length) {
+  //       const response = await this.#client.graphql(UPDATE_INVENTORY, { location: location.id, adjustments });
+  //       if (response.errors) {
+  //         log.error('shopify push')(JSON.stringify(response))
+  //       }
+  //     }
 
-      if (!location.inventoryLevels.pageInfo.hasNextPage) { return; }
-      after = last(location.inventoryLevels.edges).cursor;
-    }
-  }
+  //     if (!location.inventoryLevels.pageInfo.hasNextPage) { return; }
+  //     after = last(location.inventoryLevels.edges).cursor;
+  //   }
+  // }
 
-  processOrder(data) {
-    return {
-      orderedAt: DateTime.fromISO(data.created_at),
-      items: data
-        .line_items
-        .filter(complement(prop('tip')))
-        .map(pick(['sku', 'quantity'])),
-    };
-  }
+  // processOrder(data) {
+  //   return {
+  //     orderedAt: DateTime.fromISO(data.created_at),
+  //     items: data
+  //       .line_items
+  //       .filter(complement(prop('tip')))
+  //       .map(pick(['sku', 'quantity'])),
+  //   };
+  // }
 
   async getAddresses() {
     const addresses = [];
@@ -135,28 +135,28 @@ class Shopify {
     return addresses;
   }
 
-  async registerForWebhooks() {
-    const { data, errors } = await this.#client
-      .graphql(REGISTER_FOR_WEBHOOKS, {
-        createCallback: this.#orderCreatedCallback,
-        cancelledCallback: this.#orderCancelledCallback,
-      });
-    if (errors?.length) {
-      throw new Error(errors.map(prop('message')).join('. '));
-    }
-    const { createOrdersHook, cancelOrdersHook } = data;
-    if (createOrdersHook.userErrors?.length || cancelOrdersHook.userErrors?.length) {
-      throw new HooksExistError;
-    }
-  }
+  // async registerForWebhooks() {
+  //   const { data, errors } = await this.#client
+  //     .graphql(REGISTER_FOR_WEBHOOKS, {
+  //       createCallback: this.#orderCreatedCallback,
+  //       cancelledCallback: this.#orderCancelledCallback,
+  //     });
+  //   if (errors?.length) {
+  //     throw new Error(errors.map(prop('message')).join('. '));
+  //   }
+  //   const { createOrdersHook, cancelOrdersHook } = data;
+  //   if (createOrdersHook.userErrors?.length || cancelOrdersHook.userErrors?.length) {
+  //     throw new HooksExistError;
+  //   }
+  // }
 
-  async unregisterForWebhooks() {
-    await this.#client.graphql(CHECK_WEBHOOKS)
-      .then(path(['data', 'webhookSubscriptions', 'edges']))
-      .then(map(path(['node', 'id'])))
-      .then(map((id) => this.#client.graphql(UNREGISTER_WEBHOOK, { id })))
-      .then(all);
-  }
+  // async unregisterForWebhooks() {
+  //   await this.#client.graphql(CHECK_WEBHOOKS)
+  //     .then(path(['data', 'webhookSubscriptions', 'edges']))
+  //     .then(map(path(['node', 'id'])))
+  //     .then(map((id) => this.#client.graphql(UNREGISTER_WEBHOOK, { id })))
+  //     .then(all);
+  // }
 }
 
 const token = fs

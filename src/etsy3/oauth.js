@@ -1,7 +1,6 @@
 const crypto = require('crypto');
 const { default: formurlencoded } = require('form-urlencoded');
 const qs = require('qs');
-const bent = require('bent');
 const Queue = require('../util/ratelimit');
 const base64url = require('../util/base64url');
 
@@ -70,11 +69,15 @@ class EtsyOAuth2 {
       code_verifier: challenge,
     });
     const requestedAt = Date.now();
-    const response = await bent('POST', 'json', API_URL)('/public/oauth/token', body, {
-      'Content-Type': 'application/x-www-form-urlencoded',
+    const response = await fetch(`${API_URL}/public/oauth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body,
     });
-    response.requested_at = requestedAt;
-    this.#emit('authenticate', response);
+    if (!response.ok) throw new Error(await response.text());
+    const json = await response.json();
+    json.requested_at = requestedAt;
+    this.#emit('authenticate', json);
   }
 
   async #refreshToken() {
@@ -87,28 +90,56 @@ class EtsyOAuth2 {
       refresh_token,
     });
     const requestedAt = Date.now();
-    const response = await bent('POST', 'json', API_URL)('/public/oauth/token', body, {
-      'Content-Type': 'application/x-www-form-urlencoded',
+    const response = await fetch(`${API_URL}/public/oauth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body,
     });
-    response.requested_at = requestedAt;
-    this.#emit('authenticate', response);
+    if (!response.ok) throw new Error(await response.text());
+    const json = await response.json();
+    json.requested_at = requestedAt;
+    this.#emit('authenticate', json);
   }
 
   setCredentials(credentials) {
     this.#credentials = credentials;
     const { access_token } = credentials;
-    this.#poster = bent('POST', 'json', API_URL, {
-      'X-Api-Key': `${this.#clientId}:${this.#clientSecret}`,
-      'Authorization': `Bearer ${access_token}`,
-    });
-    this.#getter = bent('GET', 'json', API_URL, {
-      'X-Api-Key': `${this.#clientId}:${this.#clientSecret}`,
-      'Authorization': `Bearer ${access_token}`,
-    });
-    this.#putter = bent('PUT', 'json', API_URL, {
-      'X-Api-Key': `${this.#clientId}:${this.#clientSecret}`,
-      'Authorization': `Bearer ${access_token}`,
-    });
+    this.#poster = async (path, body) => {
+      const response = await fetch(`${API_URL}${path}`, {
+        method: 'POST',
+        headers: {
+          'X-Api-Key': `${this.#clientId}:${this.#clientSecret}`,
+          'Authorization': `Bearer ${access_token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) throw new Error(await response.text());
+      return response.json();
+    };
+    this.#getter = async (path, body) => {
+      const response = await fetch(`${API_URL}${path}`, {
+        method: 'GET',
+        headers: {
+          'X-Api-Key': `${this.#clientId}:${this.#clientSecret}`,
+          'Authorization': `Bearer ${access_token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) throw new Error(await response.text());
+      return response.json();
+    };
+    this.#putter = async (path, body) => {
+      const response = await fetch(`${API_URL}${path}`, {
+        method: 'PUT',
+        headers: {
+          'X-Api-Key': `${this.#clientId}:${this.#clientSecret}`,
+          'Authorization': `Bearer ${access_token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) throw new Error(await response.text());
+      return response.json();
+    };
   }
 
   async get(endpoint, params) {

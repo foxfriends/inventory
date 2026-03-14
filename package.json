@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "private": true,
   "engines": {
-    "node": "24.13.1",
-    "npm": "11.8.0"
+    "node": "24.14.0",
+    "npm": "11.9.0"
   },
   "scripts": {
     "start": "node --max-http-header-size 32768 src/index.js",
@@ -32,7 +32,6 @@
     "@flighter/a1-notation": "^1.0.7",
     "@koa/router": "^13.1.0",
     "basic-auth": "^2.0.1",
-    "bent": "^7.3.12",
     "cron": "^1.8.2",
     "dot": "^2.0.0-beta.1",
     "form-urlencoded": "^4.2.1",
@@ -41,7 +40,7 @@
     "koa": "^2.16.1",
     "koa-body": "^4.2.0",
     "koa-error": "^3.2.0",
-    "koa-logger": "^3.2.1",
+    "koa-logger": "^4.0.0",
     "luxon": "^1.28.1",
     "oauth": "^0.9.15",
     "pdfkit": "^0.12.3",
